@@ -35,10 +35,6 @@
 			"lombok",
 			"com",
 			""
-		],
-		"jest.disabledWorkspaceFolders": [
-			"backend",
-			"tools"
 		]
 	}
 }
