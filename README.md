@@ -1,6 +1,6 @@
-# CrowdSelect
+# CrowdChoice
 
-CrowdSelect is a web application that is aimed at giving power to the people.
+CrowdChoice is a web application that is aimed at giving power to the people.
 It aims to making voting and thus democracy accisible for everyone.
 Currently the main focus of the application is to give content creates the ability to create a poll for their fans who can then vote (possibly by paying per vote).
 
