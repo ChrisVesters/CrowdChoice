@@ -9,7 +9,7 @@ import org.mockito.quality.Strictness;
 
 import com.cvesters.crowdchoice.election.bdo.ElectionInfo;
 import com.cvesters.crowdchoice.election.dao.ElectionDao;
-import com.cvesters.crowdchoice.election.dto.ElectionCreateDto;
+import com.cvesters.crowdchoice.election.dto.ElectionInfoDto;
 
 public record TestElection(long id, String topic) {
 
@@ -31,10 +31,6 @@ public record TestElection(long id, String topic) {
 		return new ElectionInfo(id, topic);
 	}
 
-	public ElectionCreateDto createDto() {
-		return new ElectionCreateDto(topic);
-	}
-
 	public String infoJson() {
 		return """
 				{
@@ -44,8 +40,18 @@ public record TestElection(long id, String topic) {
 				""".formatted(id, topic);
 	}
 
-	public void assertEquals(final ElectionInfo expected) {
-		assertThat(expected.getId()).isEqualTo(id);
-		assertThat(expected.getTopic()).isEqualTo(topic);
+	public void assertEquals(final ElectionInfo actual) {
+		assertThat(actual.getId()).isEqualTo(id);
+		assertThat(actual.getTopic()).isEqualTo(topic);
+	}
+
+	public void assertEquals(final ElectionDao actual) {
+		assertThat(actual.getId()).isEqualTo(id);
+		assertThat(actual.getTopic()).isEqualTo(topic);
+	}
+
+	public void assertEquals(final ElectionInfoDto actual) {
+		assertThat(actual.id()).isEqualTo(id);
+		assertThat(actual.topic()).isEqualTo(topic);
 	}
 }
