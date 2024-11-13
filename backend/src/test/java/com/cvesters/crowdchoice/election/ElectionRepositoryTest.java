@@ -5,9 +5,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.util.List;
 import java.util.Optional;
 
-import jakarta.inject.Inject;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -23,37 +25,52 @@ import com.cvesters.crowdchoice.election.dao.ElectionDao;
 @AutoConfigureTestDatabase(replace = Replace.NONE)
 class ElectionRepositoryTest {
 
-	@Inject
+	@Autowired
 	private ElectionRepository electionRepository;
+
+	@PersistenceContext
+	private EntityManager entityManager;
 
 	@Test
 	void findAll() {
 		final List<ElectionDao> elections = electionRepository.findAll();
 
-		assertThat(elections).hasSize(2);
+		assertThat(elections).hasSize(2)
+				.anySatisfy(TestElection.TOPICS::assertEquals)
+				.anySatisfy(TestElection.FEDERAL_ELECTIONS_2024::assertEquals);
+
 	}
 
 	@Test
 	void findById() {
-		final ElectionDao election = electionRepository.findById(1L).get();
-		assertThat(election).isNotNull();
+		final Optional<ElectionDao> election = electionRepository.findById(1L);
+
+		assertThat(election)
+				.hasValueSatisfying(TestElection.TOPICS::assertEquals);
+
+	}
+
+	@Test
+	void findByIdNonExisting() {
+		final Optional<ElectionDao> election = electionRepository
+				.findById(999L);
+
+		assertThat(election).isEmpty();
 	}
 
 	@Test
 	void save() {
-		final ElectionDao election = new ElectionDao();
-		election.setTopic("Election");
+		final String topic = "Election";
+
+		final var election = new ElectionDao();
+		election.setTopic(topic);
 
 		final ElectionDao saved = electionRepository.save(election);
 
 		assertThat(saved.getId()).isNotNull();
+		assertThat(saved.getTopic()).isEqualTo(topic);
 
-		final Optional<ElectionDao> found = electionRepository
-				.findById(saved.getId());
-
-		assertThat(found).hasValueSatisfying(value -> {
-			assertThat(value.getId()).isEqualTo(saved.getId());
-			assertThat(value.getTopic()).isEqualTo(election.getTopic());
-		});
+		final var found = entityManager.find(ElectionDao.class, saved.getId());
+		assertThat(found).isEqualTo(saved);
 	}
 }

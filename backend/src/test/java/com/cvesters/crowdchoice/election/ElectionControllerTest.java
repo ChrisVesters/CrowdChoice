@@ -97,8 +97,7 @@ class ElectionControllerTest {
 		@Test
 		void success() throws Exception {
 			final TestElection election = TestElection.TOPICS;
-			final String requestBody = "{ \"topic\": \"" + election.topic()
-					+ "\" }";
+			final String requestBody = requestJson(election.topic());
 
 			when(electionService.create(argThat(request -> {
 				assertThat(request.getId()).isNull();
@@ -117,7 +116,7 @@ class ElectionControllerTest {
 
 		@Test
 		void invalid() throws Exception {
-			final String requestBody = "{ \"topic\": \"\" }";
+			final String requestBody = requestJson("");
 
 			final RequestBuilder request = post(BASE_URL)
 					.contentType(MediaType.APPLICATION_JSON_VALUE)
@@ -129,8 +128,7 @@ class ElectionControllerTest {
 		@Test
 		void error() throws Exception {
 			final TestElection election = TestElection.TOPICS;
-			final String requestBody = "{ \"topic\": \"" + election.topic()
-					+ "\" }";
+			final String requestBody = requestJson(election.topic());
 
 			when(electionService.create(any()))
 					.thenThrow(RuntimeException.class);
@@ -140,6 +138,14 @@ class ElectionControllerTest {
 					.content(requestBody);
 
 			mockMvc.perform(request).andExpect(status().is5xxServerError());
+		}
+
+		private String requestJson(final String topic) {
+			return """
+					{
+						"topic": "%s"
+					}
+					""".formatted(topic);
 		}
 	}
 }

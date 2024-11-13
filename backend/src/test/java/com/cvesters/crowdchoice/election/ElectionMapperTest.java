@@ -2,12 +2,10 @@ package com.cvesters.crowdchoice.election;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.assertj.core.api.Assertions.atIndex;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 import java.util.List;
-import java.util.stream.IntStream;
 
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -43,9 +41,11 @@ class ElectionMapperTest {
 
 			final List<ElectionInfo> infos = ElectionMapper.fromDao(dao);
 
-			assertThat(infos).hasSize(elections.size())
-					.satisfies(elections.get(0)::assertEquals, atIndex(0))
-					.satisfies(elections.get(1)::assertEquals, atIndex(1));
+			assertThat(infos).hasSize(elections.size());
+
+			for (int i = 0; i < elections.size(); i++) {
+				elections.get(i).assertEquals(infos.get(i));
+			}
 		}
 
 		@Test
@@ -137,7 +137,7 @@ class ElectionMapperTest {
 		@Test
 		void success() {
 			final TestElection election = TestElection.TOPICS;
-			final ElectionCreateDto dto = election.createDto();
+			final var dto = new ElectionCreateDto(election.topic());
 
 			final ElectionInfo info = ElectionMapper.fromDto(dto);
 
@@ -178,15 +178,14 @@ class ElectionMapperTest {
 			final List<ElectionInfoDto> dtos = ElectionMapper.toDto(infos);
 
 			assertThat(dtos).hasSize(elections.size());
-			IntStream.range(0, elections.size()).forEach(i -> {
-				assertThat(dtos.get(i).id()).isEqualTo(elections.get(i).id());
-				assertThat(dtos.get(i).topic())
-						.isEqualTo(elections.get(i).topic());
-			});
+
+			for (int i = 0; i < elections.size(); i++) {
+				elections.get(i).assertEquals(dtos.get(i));
+			}
 		}
 
 		@Test
-		void nullDto() {
+		void nullBdo() {
 			final ElectionInfo info = null;
 
 			assertThatThrownBy(() -> ElectionMapper.toDto(info))
@@ -194,7 +193,7 @@ class ElectionMapperTest {
 		}
 
 		@Test
-		void nullDtos() {
+		void nullBdos() {
 			final List<ElectionInfo> infos = null;
 
 			assertThatThrownBy(() -> ElectionMapper.toDto(infos))
