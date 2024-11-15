@@ -59,6 +59,16 @@ class ElectionRepositoryTest {
 	}
 
 	@Test
+	void existsById() {
+		assertThat(electionRepository.existsById(1L)).isTrue();
+	}
+
+	@Test
+	void existsByIdNonExisting() {
+		assertThat(electionRepository.existsById(999L)).isFalse();
+	}
+
+	@Test
 	void save() {
 		final String topic = "Election";
 
