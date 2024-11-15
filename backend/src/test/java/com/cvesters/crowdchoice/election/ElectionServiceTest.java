@@ -39,7 +39,7 @@ class ElectionServiceTest {
 
 		@Test
 		void single() {
-			final TestElection election = TestElection.TOPICS;
+			final var election = TestElection.TOPICS;
 			final List<ElectionDao> daos = List.of(election.dao());
 
 			when(electionRepository.findAll()).thenReturn(daos);
@@ -51,7 +51,7 @@ class ElectionServiceTest {
 
 		@Test
 		void multiple() {
-			final List<TestElection> elections = List.of(TestElection.TOPICS,
+			final var elections = List.of(TestElection.TOPICS,
 					TestElection.FEDERAL_ELECTIONS_2024);
 			final List<ElectionDao> daos = elections.stream()
 					.map(TestElection::dao)
@@ -95,8 +95,8 @@ class ElectionServiceTest {
 
 		@Test
 		void create() {
-			final TestElection election = TestElection.TOPICS;
-			final ElectionInfo request = new ElectionInfo(election.topic());
+			final var election = TestElection.TOPICS;
+			final var request = new ElectionInfo(election.topic());
 			final ElectionDao expectedDao = election.dao();
 
 			when(electionRepository.save(argThat(dao -> {
@@ -111,7 +111,7 @@ class ElectionServiceTest {
 		}
 
 		@Test
-		void nullElection() {
+		void electionNull() {
 			assertThatThrownBy(() -> electionService.create(null))
 					.isInstanceOf(NullPointerException.class);
 		}

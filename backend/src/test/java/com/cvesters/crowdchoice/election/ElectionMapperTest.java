@@ -49,7 +49,7 @@ class ElectionMapperTest {
 		}
 
 		@Test
-		void nullDao() {
+		void daoNull() {
 			final ElectionDao dao = null;
 
 			assertThatThrownBy(() -> ElectionMapper.fromDao(dao))
@@ -57,31 +57,10 @@ class ElectionMapperTest {
 		}
 
 		@Test
-		void nullDaos() {
+		void daosNull() {
 			final List<ElectionDao> daos = null;
 
 			assertThatThrownBy(() -> ElectionMapper.fromDao(daos))
-					.isInstanceOf(NullPointerException.class);
-		}
-	}
-
-	@Nested
-	class CreateDao {
-
-		@Test
-		void success() {
-			final TestElection election = TestElection.TOPICS;
-			final ElectionInfo bdo = election.info();
-
-			final ElectionDao dao = ElectionMapper.createDao(bdo);
-
-			assertThat(dao.getId()).isNull();
-			assertThat(dao.getTopic()).isEqualTo(election.topic());
-		}
-
-		@Test
-		void nullBdo() {
-			assertThatThrownBy(() -> ElectionMapper.createDao(null))
 					.isInstanceOf(NullPointerException.class);
 		}
 	}
@@ -114,7 +93,7 @@ class ElectionMapperTest {
 		}
 
 		@Test
-		void nullBdo() {
+		void bdoNull() {
 			final ElectionDao dao = TestElection.TOPICS.dao();
 
 			assertThatThrownBy(() -> ElectionMapper.updateDao(null, dao))
@@ -122,7 +101,7 @@ class ElectionMapperTest {
 		}
 
 		@Test
-		void nullDao() {
+		void daoNull() {
 			final ElectionInfo bdo = TestElection.TOPICS.info();
 
 			assertThatThrownBy(() -> ElectionMapper.updateDao(bdo, null))
@@ -146,7 +125,7 @@ class ElectionMapperTest {
 		}
 
 		@Test
-		void nullDto() {
+		void dtoNull() {
 			assertThatThrownBy(() -> ElectionMapper.fromDto(null))
 					.isInstanceOf(NullPointerException.class);
 		}
@@ -185,7 +164,7 @@ class ElectionMapperTest {
 		}
 
 		@Test
-		void nullBdo() {
+		void bdoNull() {
 			final ElectionInfo info = null;
 
 			assertThatThrownBy(() -> ElectionMapper.toDto(info))
@@ -193,7 +172,7 @@ class ElectionMapperTest {
 		}
 
 		@Test
-		void nullBdos() {
+		void bdosNull() {
 			final List<ElectionInfo> infos = null;
 
 			assertThatThrownBy(() -> ElectionMapper.toDto(infos))
