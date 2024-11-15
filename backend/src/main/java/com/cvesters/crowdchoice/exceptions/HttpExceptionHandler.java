@@ -1,17 +1,22 @@
 package com.cvesters.crowdchoice.exceptions;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 @ControllerAdvice
-public class HttpExceptionHandler {
+public class HttpExceptionHandler extends ResponseEntityExceptionHandler {
 
-	@ExceptionHandler(HttpMessageNotReadableException.class)
-	public ResponseEntity<Void> handle(
-			final HttpMessageNotReadableException e) {
-		return ResponseEntity.badRequest().build();
+	@ExceptionHandler(NotFoundException.class)
+	public ResponseEntity<Void> handle(final NotFoundException e) {
+		return ResponseEntity.notFound().build();
+	}
+
+	@ExceptionHandler(ConflictException.class)
+	public ResponseEntity<Void> handle(final ConflictException e) {
+		return ResponseEntity.status(HttpStatus.CONFLICT).build();
 	}
 
 	@ExceptionHandler(Exception.class)

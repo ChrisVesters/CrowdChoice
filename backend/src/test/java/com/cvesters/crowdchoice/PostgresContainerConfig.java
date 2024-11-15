@@ -10,6 +10,7 @@ public class PostgresContainerConfig {
 
 	@Bean
 	@ServiceConnection
+	@SuppressWarnings("resource")
 	PostgreSQLContainer<?> postgresContainer() {
 		return new PostgreSQLContainer<>("postgres:latest")
 		.withDatabaseName("trajectx")
