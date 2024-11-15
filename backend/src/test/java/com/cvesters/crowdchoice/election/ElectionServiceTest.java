@@ -1,6 +1,7 @@
 package com.cvesters.crowdchoice.election;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatNoException;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.mock;
@@ -15,6 +16,7 @@ import org.junit.jupiter.api.Test;
 
 import com.cvesters.crowdchoice.election.bdo.ElectionInfo;
 import com.cvesters.crowdchoice.election.dao.ElectionDao;
+import com.cvesters.crowdchoice.exceptions.NotFoundException;
 
 class ElectionServiceTest {
 
@@ -62,6 +64,29 @@ class ElectionServiceTest {
 			assertThat(found).hasSize(elections.size());
 			IntStream.range(0, elections.size())
 					.forEach(i -> elections.get(i).assertEquals(found.get(i)));
+		}
+	}
+
+	@Nested
+	class VerifyExists {
+
+		private static final TestElection ELECTION = TestElection.TOPICS;
+		private static final long ELECTION_ID = ELECTION.id();
+
+		@Test
+		void exists() {
+			when(electionRepository.existsById(ELECTION_ID)).thenReturn(true);
+
+			assertThatNoException().isThrownBy(
+					() -> electionService.verifyExists(ELECTION_ID));
+		}
+
+		@Test
+		void doesNotExist() {
+			when(electionRepository.existsById(ELECTION_ID)).thenReturn(false);
+
+			assertThatThrownBy(() -> electionService.verifyExists(ELECTION_ID))
+					.isInstanceOf(NotFoundException.class);
 		}
 	}
 
