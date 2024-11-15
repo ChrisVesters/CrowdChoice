@@ -25,19 +25,12 @@ public final class ElectionMapper {
 		return new ElectionInfo(dao.getId(), dao.getTopic());
 	}
 
-	public static ElectionDao createDao(final ElectionInfo election) {
-		Objects.requireNonNull(election);
-
-		return updateDao(election, new ElectionDao());
-	}
-
-	public static ElectionDao updateDao(final ElectionInfo election,
+	public static void updateDao(final ElectionInfo election,
 			final ElectionDao dao) {
 		Objects.requireNonNull(election);
 		Objects.requireNonNull(dao);
 
 		dao.setTopic(election.getTopic());
-		return dao;
 	}
 
 	public static ElectionInfo fromDto(final ElectionCreateDto dto) {

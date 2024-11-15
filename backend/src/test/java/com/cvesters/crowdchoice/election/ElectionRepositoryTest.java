@@ -43,29 +43,31 @@ class ElectionRepositoryTest {
 
 	@Test
 	void findById() {
-		final Optional<ElectionDao> election = electionRepository.findById(1L);
+		final var election = TestElection.TOPICS;
+		final Optional<ElectionDao> found = electionRepository
+				.findById(election.id());
 
-		assertThat(election)
-				.hasValueSatisfying(TestElection.TOPICS::assertEquals);
+		assertThat(found).hasValueSatisfying(election::assertEquals);
 
 	}
 
 	@Test
 	void findByIdNonExisting() {
 		final Optional<ElectionDao> election = electionRepository
-				.findById(999L);
+				.findById(Long.MAX_VALUE);
 
 		assertThat(election).isEmpty();
 	}
 
 	@Test
 	void existsById() {
-		assertThat(electionRepository.existsById(1L)).isTrue();
+		final var election = TestElection.TOPICS;
+		assertThat(electionRepository.existsById(election.id())).isTrue();
 	}
 
 	@Test
 	void existsByIdNonExisting() {
-		assertThat(electionRepository.existsById(999L)).isFalse();
+		assertThat(electionRepository.existsById(Long.MAX_VALUE)).isFalse();
 	}
 
 	@Test
