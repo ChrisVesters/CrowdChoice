@@ -4,3 +4,13 @@ CREATE TABLE elections(
 
 	PRIMARY KEY(id)
 );
+
+CREATE TABLE candidates(
+	id BIGINT NOT NULL GENERATED ALWAYS AS IDENTITY,
+	election_id BIGINT NOT NULL,
+	name TEXT NOT NULL,
+
+	PRIMARY KEY(id),
+	FOREIGN KEY(election_id) REFERENCES elections(id) ON DELETE CASCADE,
+	UNIQUE(election_id, name)
+);
