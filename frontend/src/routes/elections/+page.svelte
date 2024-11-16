@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { goto } from "$app/navigation";
 	
-	import { ElectionClient } from "$lib/elections/ElectionClient";
+	import { ElectionClient } from "$lib/election/ElectionClient";
 
 	const { data } = $props();
 
@@ -14,14 +14,14 @@
 	}
 </script>
 
-<h1>Elections</h1>
-
+<h1>Overview</h1>
+<h2>Elections</h2>
 <ul>
 	{#each data.elections as election}
 		<li><a href="/elections/{election.id}"> {election.topic}</a></li>
 	{/each}
 </ul>
 
-<h2>New Election</h2>
+<h3>New Election</h3>
 <input bind:this={topicField} />
 <button onclick={handleAddElection}>Add</button>

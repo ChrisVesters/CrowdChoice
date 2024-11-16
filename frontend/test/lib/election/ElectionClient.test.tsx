@@ -1,6 +1,7 @@
 import { test, expect, vi } from 'vitest';
 
-import { Election, ElectionClient } from "$lib/elections/ElectionClient";
+import { ElectionClient } from "$lib/election/ElectionClient";
+import { Election } from "$lib/election/ElectionTypes";
 
 afterEach(() => {
 	vi.clearAllMocks();
@@ -25,6 +26,24 @@ test.each([
 
 	expect(response).toHaveLength(elections.length);
 	expect(response).toEqual(elections);
+});
+
+test("Get", async () => {
+	const election: Election = { id: 1, topic: "Topics" };
+
+	global.fetch = vi.fn(() =>
+		Promise.resolve({
+			json: () => Promise.resolve(election)
+		})
+	);
+
+	const response: Election = await ElectionClient.get(1);
+
+	expect(fetch).toHaveBeenCalledWith(
+		"http://localhost:7000/api/elections/1"
+	);
+
+	expect(response).toEqual(election);
 });
 
 test("Create", async () => {
