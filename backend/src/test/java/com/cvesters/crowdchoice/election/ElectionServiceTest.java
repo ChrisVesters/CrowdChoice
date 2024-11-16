@@ -9,6 +9,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.IntStream;
 
 import org.junit.jupiter.api.Nested;
@@ -64,6 +65,31 @@ class ElectionServiceTest {
 			assertThat(found).hasSize(elections.size());
 			IntStream.range(0, elections.size())
 					.forEach(i -> elections.get(i).assertEquals(found.get(i)));
+		}
+	}
+
+	@Nested
+	class Get {
+
+		@Test
+		void success() {
+			final TestElection election = TestElection.TOPICS;
+			final ElectionDao dao = election.dao();
+
+			when(electionRepository.findById(1L)).thenReturn(Optional.of(dao));
+
+			final ElectionInfo found = electionService.get(1L);
+
+			election.assertEquals(found);
+		}
+
+		@Test
+		void notFound() {
+			when(electionRepository.findById(1L)).thenReturn(Optional.empty());
+
+			assertThatThrownBy(() -> electionService.get(1L))
+					.isInstanceOf(NotFoundException.class);
+
 		}
 	}
 

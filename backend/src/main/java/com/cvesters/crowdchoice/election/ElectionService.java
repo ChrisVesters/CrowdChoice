@@ -24,6 +24,13 @@ public class ElectionService {
 		return ElectionMapper.fromDao(daos);
 	}
 
+	public ElectionInfo get(final long electionId) {
+		final ElectionDao dao = electionRepository.findById(electionId)
+				.orElseThrow(NotFoundException::new);
+
+		return ElectionMapper.fromDao(dao);
+	}
+
 	public void verifyExists(final long electionId) {
 		if (!electionRepository.existsById(electionId)) {
 			throw new NotFoundException();

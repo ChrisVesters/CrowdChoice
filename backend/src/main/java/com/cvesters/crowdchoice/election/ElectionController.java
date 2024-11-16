@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -28,6 +29,12 @@ public class ElectionController {
 	public List<ElectionInfoDto> getAll() {
 		final List<ElectionInfo> elections = electionService.findAll();
 		return ElectionMapper.toDto(elections);
+	}
+
+	@GetMapping("/{id}")
+	public ElectionInfoDto get(@PathVariable final long id) {
+		final ElectionInfo info = electionService.get(id);
+		return ElectionMapper.toDto(info);
 	}
 
 	@PostMapping
