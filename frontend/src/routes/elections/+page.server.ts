@@ -1,4 +1,5 @@
-import { ElectionClient, type Election } from '$lib/elections/ElectionClient';
+import { ElectionClient } from '$lib/election/ElectionClient';
+import type { Election } from '$lib/election/ElectionTypes';
 
 export async function load(): Promise<{ elections: Array<Election> }> {
 	return {
