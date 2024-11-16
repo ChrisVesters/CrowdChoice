@@ -23,6 +23,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.RequestBuilder;
 
 import com.cvesters.crowdchoice.election.bdo.ElectionInfo;
+import com.cvesters.crowdchoice.exceptions.NotFoundException;
 
 @WebMvcTest(ElectionController.class)
 class ElectionControllerTest {
@@ -92,6 +93,35 @@ class ElectionControllerTest {
 	}
 
 	@Nested
+	class Get {
+
+		private static final TestElection ELECTION = TestElection.TOPICS;
+		private static final String ENDPOINT = BASE_URL + "/" + ELECTION.id();
+
+		@Test
+		void success() throws Exception {
+			when(electionService.get(ELECTION.id()))
+					.thenReturn(ELECTION.info());
+
+			final RequestBuilder request = get(ENDPOINT);
+
+			mockMvc.perform(request)
+					.andExpect(status().isOk())
+					.andExpect(content().json(ELECTION.infoJson()));
+		}
+
+		@Test
+		void notFound() throws Exception {
+			when(electionService.get(ELECTION.id()))
+					.thenThrow(new NotFoundException());
+
+			final RequestBuilder request = get(ENDPOINT);
+
+			mockMvc.perform(request).andExpect(status().isNotFound());
+		}
+	}
+
+	@Nested
 	class Create {
 
 		@Test
@@ -112,6 +142,14 @@ class ElectionControllerTest {
 			mockMvc.perform(request)
 					.andExpect(status().isCreated())
 					.andExpect(content().json(election.infoJson()));
+		}
+
+		@Test
+		void withoutBody() throws Exception {
+			final RequestBuilder request = post(BASE_URL)
+					.contentType(MediaType.APPLICATION_JSON_VALUE);
+
+			mockMvc.perform(request).andExpect(status().isBadRequest());
 		}
 
 		@Test
