@@ -2,15 +2,18 @@ package com.cvesters.crowdchoice.candidate;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -25,6 +28,8 @@ import com.cvesters.crowdchoice.exceptions.NotFoundException;
 class CandidateServiceTest {
 
 	private static final TestCandidate CANDIDATE = TestCandidate.MICRONAUT;
+	private static final long CANDIDATE_ID = CANDIDATE.id();
+
 	private static final TestElection ELECTION = CANDIDATE.election();
 	private static final long ELECTION_ID = ELECTION.id();
 
@@ -146,6 +151,46 @@ class CandidateServiceTest {
 			assertThatThrownBy(
 					() -> candidateService.create(ELECTION_ID, candidate))
 							.isInstanceOf(NullPointerException.class);
+		}
+	}
+
+	@Nested
+	class Delete {
+
+		@Test
+		void success() {
+			final CandidateDao dao = CANDIDATE.dao();
+			when(candidateRepository.findByElectionIdAndId(ELECTION_ID,
+					CANDIDATE_ID)).thenReturn(Optional.of(dao));
+
+			candidateService.delete(ELECTION_ID, CANDIDATE_ID);
+
+			verify(candidateRepository).delete(dao);
+		}
+
+		@Test
+		void electionNotFound() {
+			doThrow(new NotFoundException()).when(electionService)
+					.verifyExists(ELECTION_ID);
+
+			assertThatThrownBy(
+					() -> candidateService.delete(ELECTION_ID, CANDIDATE_ID))
+							.isInstanceOf(NotFoundException.class);
+
+			verify(candidateRepository, never()).delete(any());
+
+		}
+
+		@Test
+		void candidateNotFound() {
+			when(candidateRepository.findByElectionIdAndId(ELECTION_ID,
+					CANDIDATE_ID)).thenReturn(Optional.empty());
+
+			assertThatThrownBy(
+					() -> candidateService.delete(ELECTION_ID, CANDIDATE_ID))
+							.isInstanceOf(NotFoundException.class);
+
+			verify(candidateRepository, never()).delete(any());
 		}
 	}
 }

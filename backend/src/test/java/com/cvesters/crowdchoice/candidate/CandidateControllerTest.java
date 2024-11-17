@@ -3,7 +3,10 @@ package com.cvesters.crowdchoice.candidate;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -129,7 +132,7 @@ class CandidateControllerTest {
 					.content(requestBody);
 
 			mockMvc.perform(request)
-					.andExpect(status().isOk())
+					.andExpect(status().isCreated())
 					.andExpect(content().json(candidate.infoJson()));
 		}
 
@@ -175,6 +178,35 @@ class CandidateControllerTest {
 						"name": "%s"
 					}
 					""".formatted(name);
+		}
+	}
+
+	@Nested
+	class Delete {
+
+		@Test
+		void success() throws Exception {
+			final TestCandidate candidate = TestCandidate.LOMBOK;
+
+			final RequestBuilder request = delete(
+					BASE_URL + "/" + candidate.id());
+
+			mockMvc.perform(request).andExpect(status().isNoContent());
+
+			verify(candidateService).delete(ELECTION_ID, candidate.id());
+		}
+
+		@Test
+		void notFound() throws Exception {
+			final TestCandidate candidate = TestCandidate.LOMBOK;
+
+			doThrow(new NotFoundException()).when(candidateService)
+					.delete(ELECTION_ID, candidate.id());
+
+			final RequestBuilder request = delete(
+					BASE_URL + "/" + candidate.id());
+
+			mockMvc.perform(request).andExpect(status().isNotFound());
 		}
 	}
 }
