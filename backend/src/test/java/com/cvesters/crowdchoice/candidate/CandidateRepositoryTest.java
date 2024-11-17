@@ -61,20 +61,26 @@ class CandidateRepositoryTest {
 	}
 
 	@Test
-	void findById() {
+	void findByElectionIdAndId() {
 		final var candidate = TestCandidate.TRUMP;
+		final long electionId = candidate.election().id();
+		final long candidateId = candidate.id();
+
 		final Optional<CandidateDao> found = candidateRepository
-				.findById(candidate.id());
+				.findByElectionIdAndId(electionId, candidateId);
 
 		assertThat(found).hasValueSatisfying(candidate::assertEquals);
 	}
 
 	@Test
-	void findByIdNotFound() {
-		final Optional<CandidateDao> candidate = candidateRepository
-				.findById(Long.MAX_VALUE);
+	void findByElectionIdAndIdNotFound() {
+		final var candidate = TestCandidate.TRUMP;
+		final long electionId = candidate.election().id();
+		
+		final Optional<CandidateDao> found = candidateRepository
+				.findByElectionIdAndId(electionId, Long.MAX_VALUE);
 
-		assertThat(candidate).isEmpty();
+		assertThat(found).isEmpty();
 	}
 
 	@Test
@@ -93,5 +99,16 @@ class CandidateRepositoryTest {
 
 		final var found = entityManager.find(CandidateDao.class, saved.getId());
 		assertThat(found).isEqualTo(saved);
+	}
+
+	@Test
+	void delete() {
+		final long candidateId = 1L;
+		final CandidateDao dao = entityManager.find(CandidateDao.class, candidateId);
+
+		candidateRepository.delete(dao);
+
+		assertThat(entityManager.contains(dao)).isFalse();
+		assertThat(entityManager.find(CandidateDao.class, candidateId)).isNull();
 	}
 }

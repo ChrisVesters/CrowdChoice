@@ -9,6 +9,7 @@ import com.cvesters.crowdchoice.candidate.bdo.Candidate;
 import com.cvesters.crowdchoice.candidate.dao.CandidateDao;
 import com.cvesters.crowdchoice.election.ElectionService;
 import com.cvesters.crowdchoice.exceptions.ConflictException;
+import com.cvesters.crowdchoice.exceptions.NotFoundException;
 
 @Service
 public class CandidateService {
@@ -46,5 +47,15 @@ public class CandidateService {
 		final CandidateDao saved = candidateRepository.save(dao);
 
 		return CandidateMapper.fromDao(saved);
+	}
+
+	public void delete(final long electionId, final long id) {
+		electionService.verifyExists(electionId);
+
+		final CandidateDao candidate = candidateRepository
+				.findByElectionIdAndId(electionId, id)
+				.orElseThrow(NotFoundException::new);
+
+		candidateRepository.delete(candidate);
 	}
 }
