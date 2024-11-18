@@ -7,6 +7,8 @@ afterEach(() => {
 	vi.clearAllMocks();
 });
 
+const BASE_URL = "http://localhost:7000/api";
+
 test.each([
 	["Empty", []],
 	["Single", [{ id: 1, name: "Micronaut" }]],
@@ -21,7 +23,7 @@ test.each([
 	const response: Array<Candidate> = await CandidateClient.getAll(1);
 
 	expect(fetch).toHaveBeenCalledWith(
-		"http://localhost:7000/api/elections/1/candidates"
+		`${BASE_URL}/elections/1/candidates`
 	);
 
 	expect(response).toHaveLength(candidates.length);
@@ -42,7 +44,7 @@ test("Create", async () => {
 	const response = await CandidateClient.create(electionId, candidate.name);
 
 	expect(fetch).toHaveBeenCalledWith(
-		`http://localhost:7000/api/elections/${electionId}/candidates`,
+		`${BASE_URL}/elections/${electionId}/candidates`,
 		{
 			method: "POST",
 			headers: {
@@ -53,4 +55,28 @@ test("Create", async () => {
 	);
 
 	expect(response).toEqual(candidate);
+});
+
+
+test("Delete", async() => {
+	const electionId = 1;
+	const candidateId = 2;
+
+	global.fetch = vi.fn(() =>
+		Promise.resolve({
+			json: () => Promise.resolve(undefined)
+		})
+	);
+
+	await CandidateClient.delete(electionId, candidateId);
+
+	expect(fetch).toHaveBeenCalledWith(
+		`${BASE_URL}/elections/${electionId}/candidates/${candidateId}`,
+		{
+			method: "DELETE",
+			headers: {
+				"Content-Type": "application/json"
+			}
+		}
+	);
 });

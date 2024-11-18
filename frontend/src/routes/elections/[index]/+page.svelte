@@ -11,13 +11,23 @@
 			.then(() => (candidateNameField.value = ""))
 			.then(() => invalidateAll());
 	}
+
+	function handleRemoveCandidate(candidateId: number): void {
+		CandidateClient.delete(data.info.id, candidateId)
+			.then(() => invalidateAll());
+	}
 </script>
 
 <h1>{@html data.info.topic}</h1>
 <h2>Candidates</h2>
 <ul>
 	{#each data.candidates as candidate}
-		<li>{candidate.name}</li>
+		<li>
+			<button onclick={() => handleRemoveCandidate(candidate.id)}>
+				Remove
+			</button>
+			{candidate.name}
+		</li>
 	{/each}
 </ul>
 

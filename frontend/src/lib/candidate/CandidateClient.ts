@@ -16,6 +16,15 @@ export class CandidateClient {
 			body: JSON.stringify({ name })
 		}).then(res => res.json());
 	}
+
+	public static async delete(electionId: number, candidateId: number): Promise<void> {
+		return fetch(`${getEndpoint(electionId)}/${candidateId}`, {
+			method: "DELETE",
+			headers: {
+				"Content-Type": "application/json"
+			}
+		}).then();
+	}
 }
 
 function getEndpoint(electionId: number): string {
