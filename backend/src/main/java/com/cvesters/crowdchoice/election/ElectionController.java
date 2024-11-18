@@ -3,6 +3,7 @@ package com.cvesters.crowdchoice.election;
 import java.util.List;
 
 import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -31,9 +32,9 @@ public class ElectionController {
 		return ElectionMapper.toDto(elections);
 	}
 
-	@GetMapping("/{id}")
-	public ElectionInfoDto get(@PathVariable final long id) {
-		final ElectionInfo info = electionService.get(id);
+	@GetMapping("/{electionId}")
+	public ElectionInfoDto get(@PathVariable final long electionId) {
+		final ElectionInfo info = electionService.get(electionId);
 		return ElectionMapper.toDto(info);
 	}
 
@@ -44,5 +45,11 @@ public class ElectionController {
 		final ElectionInfo requested = ElectionMapper.fromDto(electionDto);
 		final ElectionInfo created = electionService.create(requested);
 		return ElectionMapper.toDto(created);
+	}
+
+	@DeleteMapping("/{electionId}")
+	@ResponseStatus(HttpStatus.NO_CONTENT)
+	public void delete(@PathVariable final long electionId) {
+		electionService.delete(electionId);
 	}
 }

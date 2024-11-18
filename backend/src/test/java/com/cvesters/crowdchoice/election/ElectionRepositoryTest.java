@@ -85,4 +85,15 @@ class ElectionRepositoryTest {
 		final var found = entityManager.find(ElectionDao.class, saved.getId());
 		assertThat(found).isEqualTo(saved);
 	}
+
+	@Test
+	void delete() {
+		final long electionId = 1L;
+		final ElectionDao dao = entityManager.find(ElectionDao.class, electionId);
+	
+		electionRepository.delete(dao);
+	
+		assertThat(entityManager.contains(dao)).isFalse();
+		assertThat(entityManager.find(ElectionDao.class, electionId)).isNull();
+	}
 }
