@@ -73,10 +73,7 @@ test("Delete", async() => {
 	expect(fetch).toHaveBeenCalledWith(
 		`${BASE_URL}/elections/${electionId}/candidates/${candidateId}`,
 		{
-			method: "DELETE",
-			headers: {
-				"Content-Type": "application/json"
-			}
+			method: "DELETE"
 		}
 	);
 });

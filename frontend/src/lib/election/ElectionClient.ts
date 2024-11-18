@@ -18,6 +18,12 @@ export class ElectionClient {
 			body: JSON.stringify({ topic })
 		}).then(res => res.json());
 	}
+
+	public static async delete(id: number): Promise<void> {
+		return fetch(`${getEndpoint()}/${id}`, {
+			method: "DELETE"
+		}).then();
+	}
 }
 
 function getEndpoint(): string {

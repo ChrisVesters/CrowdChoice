@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { goto } from "$app/navigation";
-	
+	import { goto, invalidateAll } from "$app/navigation";
+
 	import { ElectionClient } from "$lib/election/ElectionClient";
 
 	const { data } = $props();
@@ -12,13 +12,22 @@
 			goto(`/elections/${election.id}`);
 		});
 	}
+
+	function handleRemoveElection(id: number): void {
+		ElectionClient.delete(id).then(invalidateAll);
+	}
 </script>
 
 <h1>Overview</h1>
 <h2>Elections</h2>
 <ul>
 	{#each data.elections as election}
-		<li><a href="/elections/{election.id}"> {election.topic}</a></li>
+		<li>
+			<button onclick={() => handleRemoveElection(election.id)}>
+				Remove
+			</button>
+			<a href="/elections/{election.id}"> {election.topic}</a>
+		</li>
 	{/each}
 </ul>
 
