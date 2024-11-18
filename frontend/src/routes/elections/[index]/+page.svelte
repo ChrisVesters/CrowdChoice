@@ -9,12 +9,12 @@
 	function handleAddCandidate(): void {
 		CandidateClient.create(data.info.id, candidateNameField.value)
 			.then(() => (candidateNameField.value = ""))
-			.then(() => invalidateAll());
+			.then(invalidateAll);
 	}
 
 	function handleRemoveCandidate(candidateId: number): void {
 		CandidateClient.delete(data.info.id, candidateId)
-			.then(() => invalidateAll());
+			.then(invalidateAll);
 	}
 </script>
 

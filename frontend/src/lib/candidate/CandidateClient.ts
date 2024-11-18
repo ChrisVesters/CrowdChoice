@@ -19,10 +19,7 @@ export class CandidateClient {
 
 	public static async delete(electionId: number, candidateId: number): Promise<void> {
 		return fetch(`${getEndpoint(electionId)}/${candidateId}`, {
-			method: "DELETE",
-			headers: {
-				"Content-Type": "application/json"
-			}
+			method: "DELETE"
 		}).then();
 	}
 }
