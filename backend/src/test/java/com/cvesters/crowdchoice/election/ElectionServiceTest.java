@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThatNoException;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.Collections;
@@ -140,6 +141,34 @@ class ElectionServiceTest {
 		void electionNull() {
 			assertThatThrownBy(() -> electionService.create(null))
 					.isInstanceOf(NullPointerException.class);
+		}
+	}
+
+	@Nested
+	class Delete {
+
+		private static final TestElection ELECTION = TestElection.TOPICS;
+		private static final long ELECTION_ID = ELECTION.id();
+
+		@Test
+		void success() {
+
+			final ElectionDao dao = ELECTION.dao();
+			when(electionRepository.findById(ELECTION_ID))
+					.thenReturn(Optional.of(dao));
+
+			electionService.delete(ELECTION_ID);
+
+			verify(electionRepository).delete(dao);
+		}
+
+		@Test
+		void electionNotFound() {
+			when(electionRepository.findById(ELECTION_ID))
+					.thenReturn(Optional.empty());
+
+			assertThatThrownBy(() -> electionService.delete(ELECTION_ID))
+					.isInstanceOf(NotFoundException.class);
 		}
 	}
 }

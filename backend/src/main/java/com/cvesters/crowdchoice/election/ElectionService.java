@@ -45,4 +45,11 @@ public class ElectionService {
 		final ElectionDao created = electionRepository.save(dao);
 		return ElectionMapper.fromDao(created);
 	}
+
+	public void delete(final long electionId) {
+		final ElectionDao dao = electionRepository.findById(electionId)
+				.orElseThrow(NotFoundException::new);
+
+		electionRepository.delete(dao);
+	}
 }

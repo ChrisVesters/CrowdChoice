@@ -3,7 +3,10 @@ package com.cvesters.crowdchoice.election;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -184,6 +187,35 @@ class ElectionControllerTest {
 						"topic": "%s"
 					}
 					""".formatted(topic);
+		}
+	}
+
+	@Nested
+	class Delete {
+
+		private static final TestElection ELECTION = TestElection.TOPICS;
+		private static final long ELECTION_ID = ELECTION.id();
+
+		@Test
+		void success() throws Exception {
+
+			final RequestBuilder request = delete(
+					BASE_URL + "/" + ELECTION.id());
+
+			mockMvc.perform(request).andExpect(status().isNoContent());
+
+			verify(electionService).delete(ELECTION_ID);
+		}
+
+		@Test
+		void notFound() throws Exception {
+			doThrow(new NotFoundException()).when(electionService)
+					.delete(ELECTION_ID);
+
+			final RequestBuilder request = delete(
+					BASE_URL + "/" + ELECTION.id());
+
+			mockMvc.perform(request).andExpect(status().isNotFound());
 		}
 	}
 }

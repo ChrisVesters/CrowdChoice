@@ -49,11 +49,11 @@ public class CandidateService {
 		return CandidateMapper.fromDao(saved);
 	}
 
-	public void delete(final long electionId, final long id) {
+	public void delete(final long electionId, final long candidateId) {
 		electionService.verifyExists(electionId);
 
 		final CandidateDao candidate = candidateRepository
-				.findByElectionIdAndId(electionId, id)
+				.findByElectionIdAndId(electionId, candidateId)
 				.orElseThrow(NotFoundException::new);
 
 		candidateRepository.delete(candidate);
