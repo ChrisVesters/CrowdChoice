@@ -1,0 +1,10 @@
+{
+	"add": "add",
+	"candidate": "candidate",
+	"candidates": "candidates",
+	"election": "election",
+	"elections": "elections",
+	"newObject": "new {{object}}",
+	"overview": "overview",
+	"remove": "remove"
+}
