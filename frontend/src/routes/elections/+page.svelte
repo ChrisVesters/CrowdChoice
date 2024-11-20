@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { goto, invalidateAll } from "$app/navigation";
+	import { t } from '$lib/translations/index';
 
 	import { ElectionClient } from "$lib/election/ElectionClient";
 
@@ -18,19 +19,19 @@
 	}
 </script>
 
-<h1>Overview</h1>
-<h2>Elections</h2>
+<h1>{$t("common.overview")}</h1>
+<h2>{$t("common.elections")}</h2>
 <ul>
 	{#each data.elections as election}
 		<li>
 			<button onclick={() => handleRemoveElection(election.id)}>
-				Remove
+				{$t("common.remove")}
 			</button>
-			<a href="/elections/{election.id}"> {election.topic}</a>
+			<a href="/elections/{election.id}">{election.topic}</a>
 		</li>
 	{/each}
 </ul>
 
-<h3>New Election</h3>
+<h3>{$t("common.newObject", { object: $t("common.election") })}</h3>
 <input bind:this={topicField} />
-<button onclick={handleAddElection}>Add</button>
+<button onclick={handleAddElection}>{$t("common.add")}</button>
