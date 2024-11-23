@@ -1,0 +1,61 @@
+body.theme-dark {
+	--background-color: lch(0% 0 0);
+	--text-color: lch(100% 0 0);
+	--primary-color: lch(13.74% 62.4 305.44);
+}
+
+body.theme-light {
+	--background-color: lch(100% 0 0);
+	--text-color: lch(0% 0 0);
+	--primary-color: lch(67.11% 54.67 302.86);
+
+	--success-color: lch(46.32% 49.6 138.76);
+	--info-color: lch(53.52% 48.18 257.28);
+	--warning-color: lch(61.3% 84.41 55.4);
+	--error-color: lch(47.88% 75.99 33.88);
+}
+
+@media (prefers-color-scheme: dark) {
+	body {
+		--background-color: lch(0% 0 0);
+		--text-color: lch(100% 0 0);
+	}
+}
+
+@media (prefers-color-scheme: light) {
+	body {
+		--background-color: lch(100% 0 0);
+		--text-color: lch(0% 0 0);
+	}
+}
+
+body {
+	--default-font-family: "Tinos", serif;
+	--default-font-size: 1.125rem;
+
+	background-color: var(--background-color);
+	color: var(--text-color);
+	font-family: var(--default-font-family);
+	font-size: var(--default-font-size);
+}
+
+
+button.primary {
+	background-color: var(--primary-color);
+}
+
+button.danger {
+	background-color: var(--error-color);
+}
+
+button {
+	border: none;
+	border-radius: 0.5rem;
+	padding: 0.5rem;
+
+	cursor: pointer;
+}
+
+button:hover {
+	opacity: 0.8;
+}

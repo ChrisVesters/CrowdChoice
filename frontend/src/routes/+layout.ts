@@ -1,5 +1,6 @@
-import { loadTranslations } from '$lib/translations';
 import type { Load } from "@sveltejs/kit";
+import { loadTranslations } from '$lib/translations';
+import "../app.css";
 
 export const load: Load = async ({ url }) => {
   const { pathname } = url;
