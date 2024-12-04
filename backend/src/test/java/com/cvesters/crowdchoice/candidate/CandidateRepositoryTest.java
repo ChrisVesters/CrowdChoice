@@ -1,6 +1,7 @@
 package com.cvesters.crowdchoice.candidate;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.util.List;
 import java.util.Optional;
@@ -8,6 +9,7 @@ import java.util.Optional;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
@@ -16,6 +18,7 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.test.context.jdbc.Sql;
 
 import com.cvesters.crowdchoice.PostgresContainerConfig;
@@ -44,71 +47,109 @@ class CandidateRepositoryTest {
 				.anySatisfy(TestCandidate.LOMBOK::assertEquals);
 	}
 
-	@Test
-	void existsByElectionIdAndName() {
-		final var candidate = TestCandidate.TRUMP;
-		assertThat(candidateRepository.existsByElectionIdAndName(
-				candidate.election().id(), candidate.name())).isTrue();
+	@Nested
+	class ExistsByElectionIdAndName {
+
+		@Test
+		void found() {
+			final var candidate = TestCandidate.TRUMP;
+			assertThat(candidateRepository.existsByElectionIdAndName(
+					candidate.election().id(), candidate.name())).isTrue();
+		}
+
+		@ParameterizedTest
+		@CsvSource({ "1,Trump", "2,Harris", "3,Micronaut" })
+		void notFound(final long electionId, final String name) {
+			assertThat(candidateRepository.existsByElectionIdAndName(electionId,
+					name)).isFalse();
+		}
 	}
 
-	@ParameterizedTest
-	@CsvSource({ "1,Trump", "2,Harris", "3,Micronaut" })
-	void existsByElectionIdAndNameNotFound(final long electionId,
-			final String name) {
-		assertThat(
-				candidateRepository.existsByElectionIdAndName(electionId, name))
-						.isFalse();
+	@Nested
+	class FindByElectionIdAndId {
+
+		@Test
+		void found() {
+			final var candidate = TestCandidate.TRUMP;
+			final long electionId = candidate.election().id();
+			final long candidateId = candidate.id();
+
+			final Optional<CandidateDao> found = candidateRepository
+					.findByElectionIdAndId(electionId, candidateId);
+
+			assertThat(found).hasValueSatisfying(candidate::assertEquals);
+		}
+
+		@Test
+		void notFound() {
+			final var candidate = TestCandidate.TRUMP;
+			final long electionId = candidate.election().id();
+
+			final Optional<CandidateDao> found = candidateRepository
+					.findByElectionIdAndId(electionId, Long.MAX_VALUE);
+
+			assertThat(found).isEmpty();
+		}
 	}
 
-	@Test
-	void findByElectionIdAndId() {
-		final var candidate = TestCandidate.TRUMP;
-		final long electionId = candidate.election().id();
-		final long candidateId = candidate.id();
+	@Nested
+	class Save {
 
-		final Optional<CandidateDao> found = candidateRepository
-				.findByElectionIdAndId(electionId, candidateId);
+		private static final long ELECTION_ID = 1L;
+		private static final String NAME = "Maven";
+		private static final String DESCRIPTION = "Java build tool";
 
-		assertThat(found).hasValueSatisfying(candidate::assertEquals);
+		@Test
+		void success() {
+			final var candidate = new CandidateDao(ELECTION_ID);
+			candidate.setName(NAME);
+			candidate.setDescription(DESCRIPTION);
+
+			final CandidateDao saved = candidateRepository.save(candidate);
+
+			assertThat(saved.getId()).isNotNull();
+			assertThat(saved.getElectionId()).isEqualTo(ELECTION_ID);
+			assertThat(saved.getName()).isEqualTo(NAME);
+			assertThat(saved.getDescription()).isEqualTo(DESCRIPTION);
+
+			final var found = entityManager.find(CandidateDao.class,
+					saved.getId());
+			assertThat(found).isEqualTo(saved);
+		}
+
+		@Test
+		void nameNull() {
+			final var candidate = new CandidateDao(ELECTION_ID);
+			candidate.setDescription(DESCRIPTION);
+
+			assertThatThrownBy(() -> candidateRepository.save(candidate))
+					.isInstanceOf(DataIntegrityViolationException.class);
+		}
+
+		@Test
+		void descriptionNull() {
+			final var candidate = new CandidateDao(ELECTION_ID);
+			candidate.setName(NAME);
+
+			assertThatThrownBy(() -> candidateRepository.save(candidate))
+					.isInstanceOf(DataIntegrityViolationException.class);
+		}
 	}
 
-	@Test
-	void findByElectionIdAndIdNotFound() {
-		final var candidate = TestCandidate.TRUMP;
-		final long electionId = candidate.election().id();
-		
-		final Optional<CandidateDao> found = candidateRepository
-				.findByElectionIdAndId(electionId, Long.MAX_VALUE);
+	@Nested
+	class Delete {
 
-		assertThat(found).isEmpty();
-	}
+		@Test
+		void found() {
+			final long candidateId = 1L;
+			final CandidateDao dao = entityManager.find(CandidateDao.class,
+					candidateId);
 
-	@Test
-	void save() {
-		final long electionId = 1L;
-		final String name = "Maven";
+			candidateRepository.delete(dao);
 
-		final var candidate = new CandidateDao(electionId);
-		candidate.setName(name);
-
-		final CandidateDao saved = candidateRepository.save(candidate);
-
-		assertThat(saved.getId()).isNotNull();
-		assertThat(saved.getElectionId()).isEqualTo(electionId);
-		assertThat(saved.getName()).isEqualTo(name);
-
-		final var found = entityManager.find(CandidateDao.class, saved.getId());
-		assertThat(found).isEqualTo(saved);
-	}
-
-	@Test
-	void delete() {
-		final long candidateId = 1L;
-		final CandidateDao dao = entityManager.find(CandidateDao.class, candidateId);
-
-		candidateRepository.delete(dao);
-
-		assertThat(entityManager.contains(dao)).isFalse();
-		assertThat(entityManager.find(CandidateDao.class, candidateId)).isNull();
+			assertThat(entityManager.contains(dao)).isFalse();
+			assertThat(entityManager.find(CandidateDao.class, candidateId))
+					.isNull();
+		}
 	}
 }

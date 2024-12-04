@@ -80,6 +80,7 @@ class CandidateMapperTest {
 			assertThat(dao.getId()).isNull();
 			assertThat(dao.getElectionId()).isEqualTo(ELECTION_ID);
 			assertThat(dao.getName()).isEqualTo(CANDIDATE.name());
+			assertThat(dao.getDescription()).isEqualTo(CANDIDATE.description());
 		}
 
 		@Test
@@ -90,6 +91,7 @@ class CandidateMapperTest {
 			CandidateMapper.updateDao(bdo, dao);
 
 			verify(dao).setName(CANDIDATE.name());
+			verify(dao).setDescription(CANDIDATE.description());
 			verifyNoMoreInteractions(dao);
 		}
 
@@ -118,12 +120,13 @@ class CandidateMapperTest {
 		@Test
 		void success() {
 			final TestCandidate candidate = TestCandidate.MICRONAUT;
-			final var dto = new CandidateCreateDto(candidate.name());
+			final var dto = new CandidateCreateDto(candidate.name(), candidate.description());
 
 			final Candidate result = CandidateMapper.fromDto(dto);
 
 			assertThat(result.getId()).isNull();
 			assertThat(result.getName()).isEqualTo(candidate.name());
+			assertThat(result.getDescription()).isEqualTo(candidate.description());
 		}
 
 		@Test
@@ -145,8 +148,7 @@ class CandidateMapperTest {
 
 			final CandidateDto dto = CandidateMapper.toDto(bdo);
 
-			assertThat(dto.id()).isEqualTo(candidate.id());
-			assertThat(dto.name()).isEqualTo(candidate.name());
+			candidate.assertEquals(dto);
 		}
 
 		@Test

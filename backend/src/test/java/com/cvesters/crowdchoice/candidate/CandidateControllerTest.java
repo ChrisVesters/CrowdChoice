@@ -175,9 +175,10 @@ class CandidateControllerTest {
 		private String requestJson(final String name) {
 			return """
 					{
-						"name": "%s"
+						"name": "%s",
+						"description": "%s"
 					}
-					""".formatted(name);
+					""".formatted(name, "");
 		}
 	}
 

@@ -100,11 +100,10 @@ class CandidateServiceTest {
 	class Create {
 
 		private final CandidateDao dao = CANDIDATE.dao();
+		private final Candidate request = new Candidate(CANDIDATE.name(), CANDIDATE.description());
 
 		@Test
 		void success() {
-			final var request = new Candidate(CANDIDATE.name());
-
 			when(candidateRepository.save(argThat(saved -> {
 				assertThat(saved.getId()).isNull();
 				assertThat(saved.getElectionId()).isEqualTo(ELECTION_ID);
@@ -120,8 +119,6 @@ class CandidateServiceTest {
 
 		@Test
 		void candidateAlreadyExists() {
-			final var request = new Candidate(CANDIDATE.name());
-
 			when(candidateRepository.existsByElectionIdAndName(ELECTION_ID,
 					CANDIDATE.name())).thenReturn(true);
 
@@ -136,7 +133,6 @@ class CandidateServiceTest {
 
 		@Test
 		void electionNotFound() {
-			final var request = new Candidate(CANDIDATE.name());
 			doThrow(new NotFoundException()).when(electionService)
 					.verifyExists(ELECTION_ID);
 

@@ -28,6 +28,8 @@ public class CandidateDao {
 
 	private String name;
 
+	private String description;
+
 	public CandidateDao(final long electionId) {
 		this.electionId = electionId;
 	}

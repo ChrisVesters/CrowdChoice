@@ -11,20 +11,23 @@ public class Candidate {
 
 	private Long id;
 	private String name;
+	private String description;
 
-	private Candidate(final Long id, final String name) {
+	private Candidate(final Long id, final String name, final String description) {
 		Objects.requireNonNull(name);
 		Validate.notBlank(name);
+		Objects.requireNonNull(description);
 
 		this.id = id;
 		this.name = name;
+		this.description = description;
 	}
 
-	public Candidate(final long id, final String name) {
-		this(Long.valueOf(id), name);
+	public Candidate(final long id, final String name, final String description) {
+		this(Long.valueOf(id), name, description);
 	}
 
-	public Candidate(final String name) {
-		this(null, name);
+	public Candidate(final String name, final String description) {
+		this(null, name, description);
 	}
 }

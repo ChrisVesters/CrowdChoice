@@ -9,6 +9,7 @@ CREATE TABLE candidates(
 	id BIGINT NOT NULL GENERATED ALWAYS AS IDENTITY,
 	election_id BIGINT NOT NULL,
 	name TEXT NOT NULL,
+	description TEXT NOT NULL,
 
 	PRIMARY KEY(id),
 	FOREIGN KEY(election_id) REFERENCES elections(id) ON DELETE CASCADE,
