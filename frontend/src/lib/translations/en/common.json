@@ -7,5 +7,6 @@
 	"newObject": "new {{object}}",
 	"overview": "overview",
 	"remove": "remove",
-	"topic": "topic"
+	"topic": "topic",
+	"name": "name"
 }
