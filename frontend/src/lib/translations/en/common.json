@@ -6,5 +6,6 @@
 	"elections": "elections",
 	"newObject": "new {{object}}",
 	"overview": "overview",
-	"remove": "remove"
+	"remove": "remove",
+	"topic": "topic"
 }

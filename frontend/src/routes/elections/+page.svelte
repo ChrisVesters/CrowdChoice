@@ -3,35 +3,33 @@
 	import { t } from '$lib/translations/index';
 
 	import { ElectionClient } from "$lib/election/ElectionClient";
+	import ElectionTable from "$lib/election/ElectionTable.svelte";
 
 	const { data } = $props();
 
-	let topicField: HTMLInputElement;
+	let newTopic: string = $state("");
 
-	function handleAddElection(): void {
-		ElectionClient.create(topicField.value).then(election => {
-			goto(`/elections/${election.id}`);
-		});
+	function isValidTopicField(): boolean {
+		console.log(newTopic);
+		return newTopic.length > 0;
 	}
 
-	function handleRemoveElection(id: number): void {
-		ElectionClient.delete(id).then(invalidateAll);
+	function handleAddElection(): void {
+		if (!isValidTopicField()) {
+			return;
+		}
+
+		ElectionClient.create(newTopic).then(election => {
+			goto(`/elections/${election.id}`);
+		});
 	}
 </script>
 
 <h1>{$t("common.overview")}</h1>
 <h2>{$t("common.elections")}</h2>
-<ul>
-	{#each data.elections as election}
-		<li>
-			<button onclick={() => handleRemoveElection(election.id)}>
-				{$t("common.remove")}
-			</button>
-			<a href="/elections/{election.id}">{election.topic}</a>
-		</li>
-	{/each}
-</ul>
+
+<ElectionTable elections = {data.elections} onChange = {invalidateAll}/>
 
 <h3>{$t("common.newObject", { object: $t("common.election") })}</h3>
-<input bind:this={topicField} />
-<button onclick={handleAddElection}>{$t("common.add")}</button>
+<input bind:value={newTopic} />
+<button onclick={handleAddElection} disabled={!isValidTopicField()}>{$t("common.add")}</button>

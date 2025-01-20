@@ -1,7 +1,7 @@
 import { test, expect, vi } from 'vitest';
 
-import { ElectionClient } from "$lib/election/ElectionClient";
-import { Election } from "$lib/election/ElectionTypes";
+import { ElectionClient } from "./ElectionClient";
+import type { Election } from "./ElectionTypes";
 
 afterEach(() => {
 	vi.clearAllMocks();
