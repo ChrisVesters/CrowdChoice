@@ -1,7 +1,7 @@
 import { test, expect, vi } from 'vitest';
 
-import { CandidateClient } from "$lib/candidate/CandidateClient";
-import { Candidate } from "$lib/candidate/CandidateTypes";
+import { CandidateClient } from "./CandidateClient";
+import type { Candidate } from "./CandidateTypes";
 
 afterEach(() => {
 	vi.clearAllMocks();
@@ -12,7 +12,7 @@ const BASE_URL = "http://localhost:7000/api";
 test.each([
 	["Empty", []],
 	["Single", [{ id: 1, name: "Micronaut" }]],
-	["Multiple", [{ id: 1, topic: "Micronaut" }, { id: 2, topic: "Lombok" }]]
+	["Multiple", [{ id: 1, name: "Micronaut" }, { id: 2, name: "Lombok" }]]
 ])("Get All - %s", async (_, candidates: Array<Candidate>) => {
 	global.fetch = vi.fn(() =>
 		Promise.resolve({
