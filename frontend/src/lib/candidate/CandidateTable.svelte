@@ -4,18 +4,21 @@
 	import { t } from "$lib/translations/index";
 
 	import { CandidateClient } from "./CandidateClient";
-	
+
+	import AddCandidateDialog from "./AddCandidateDialog.svelte";
 	import type { Candidate } from "./CandidateTypes";
 
 	export type CandidateTableprops = {
 		electionId: number;
 		candidates: Candidate[];
 		onChange: () => void;
+		onAdd: (id: number) => void;
 	};
 
 	const props: CandidateTableprops = $props();
 
 	let selected: number[] = $state([]);
+	let isAddCandidateDialogVisible: boolean = $state(false);
 
 	const toggleAll: ChangeEventHandler<HTMLInputElement> = e => {
 		if (props.candidates.length == 0) {
@@ -28,17 +31,35 @@
 			: [];
 	};
 
-	function handleRemoveElections(): void {
+	function handleRemoveCandidates(): void {
 		Promise.allSettled(
 			selected.map(id => CandidateClient.delete(props.electionId, id))
 		)
 			.then(props.onChange)
 			.then(() => (selected = []));
 	}
+
+	function showAddCandidateDialog(): void {
+		isAddCandidateDialogVisible = true;
+	}
+
+	function hideAddCandidateDialog(): void {
+		isAddCandidateDialogVisible = false;
+	}
+
+	function addCandidate(name: string): void {
+		hideAddCandidateDialog();
+		CandidateClient.create(props.electionId, name).then(candidate =>
+			props.onAdd(candidate.id)
+		);
+	}
 </script>
 
-<button onclick={handleRemoveElections} disabled={selected.length == 0}>
+<button onclick={handleRemoveCandidates} disabled={selected.length == 0}>
 	{$t("common.remove")}
+</button>
+<button onclick={showAddCandidateDialog}>
+	{$t("common.add")}
 </button>
 
 <table>
@@ -73,3 +94,7 @@
 		{/each}
 	</tbody>
 </table>
+
+{#if isAddCandidateDialogVisible === true}
+	<AddCandidateDialog onClose={hideAddCandidateDialog} onAdd={addCandidate} />
+{/if}
