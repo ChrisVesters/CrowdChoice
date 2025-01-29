@@ -1,5 +1,7 @@
 {
 	"add": "add",
+	"addObject": "add {{object}}",
+	"cancel": "cancel",
 	"candidate": "candidate",
 	"candidates": "candidates",
 	"election": "election",

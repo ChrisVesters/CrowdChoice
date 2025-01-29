@@ -8,8 +8,8 @@ import { CheckboxLocator } from "$test/locators/CheckboxLocator";
 import { TableLocator, TableRowLocator } from "$test/locators/TableLocator";
 import { setupTranslations } from "$test/Mocks";
 
-import CandidateTable from "$lib/candidate/CandidateTable.svelte";
 import { CandidateClient } from "./CandidateClient";
+import CandidateTable from "./CandidateTable.svelte";
 import type { Candidate } from "./CandidateTypes";
 
 await setupTranslations();

@@ -11,6 +11,10 @@ export class ElementAssertion<T extends HTMLElement> {
 		expect(this.locator.get()).toBeDefined();
 	}
 
+	public isNotInTheDocument(): void {
+		expect(this.locator.query()).toBeNull();
+	}
+
 	public hasLength(size: number): void {
 		expect(this.locator.getAll()).toHaveLength(size);
 	}

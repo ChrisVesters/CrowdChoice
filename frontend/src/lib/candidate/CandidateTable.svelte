@@ -1,8 +1,10 @@
 <script lang="ts">
-	import { t } from "$lib/translations/index";
 	import type { ChangeEventHandler } from "svelte/elements";
-	import { CandidateClient } from "./CandidateClient";
 
+	import { t } from "$lib/translations/index";
+
+	import { CandidateClient } from "./CandidateClient";
+	
 	import type { Candidate } from "./CandidateTypes";
 
 	export type CandidateTableprops = {

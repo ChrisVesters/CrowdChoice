@@ -1,4 +1,10 @@
-import { getAllByRole, getByRole, screen } from "@testing-library/svelte";
+import {
+	getAllByRole,
+	getByRole,
+	queryAllByRole,
+	queryByRole,
+	screen
+} from "@testing-library/svelte";
 
 export default abstract class ElementLocator<T extends HTMLElement> {
 	protected parent?: ElementLocator<HTMLElement>;
@@ -49,9 +55,33 @@ export default abstract class ElementLocator<T extends HTMLElement> {
 		}
 	}
 
+	public query(): T | null {
+		if (this.index !== undefined) {
+			const elements = this.doQueryAll();
+			const element = elements.at(this.index);
+			return element ?? null;
+		} else {
+			return this.doQuery();
+		}
+	}
+
+	public queryAll(): Array<T> {
+		const elements = this.doQueryAll();
+		if (this.index !== undefined) {
+			const element = elements.at(this.index);
+			return element ? [element] : [];
+		} else {
+			return elements;
+		}
+	}
+
 	protected abstract doGet(): T;
 
 	protected abstract doGetAll(): Array<T>;
+
+	protected abstract doQuery(): T | null;
+
+	protected abstract doQueryAll(): Array<T>;
 }
 
 export class ByRoleLocator<T extends HTMLElement> extends ElementLocator<T> {
@@ -81,6 +111,26 @@ export class ByRoleLocator<T extends HTMLElement> extends ElementLocator<T> {
 			});
 		} else {
 			return screen.getAllByRole(this.role, { name: this.label });
+		}
+	}
+
+	protected doQuery(): T | null {
+		if (this.parent !== undefined) {
+			return queryByRole(this.parent.get(), this.role, {
+				name: this.label
+			});
+		} else {
+			return screen.queryByRole(this.role, { name: this.label });
+		}
+	}
+
+	protected doQueryAll(): Array<T> {
+		if (this.parent !== undefined) {
+			return queryAllByRole(this.parent.get(), this.role, {
+				name: this.label
+			});
+		} else {
+			return screen.queryAllByRole(this.role, { name: this.label });
 		}
 	}
 }

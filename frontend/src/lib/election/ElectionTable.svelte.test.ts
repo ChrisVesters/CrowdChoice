@@ -8,17 +8,19 @@ import { CheckboxLocator } from "$test/locators/CheckboxLocator";
 import { TableLocator, TableRowLocator } from "$test/locators/TableLocator";
 import { setupTranslations } from "$test/Mocks";
 
-import ElectionTable from "$lib/election/ElectionTable.svelte";
 import { ElectionClient } from "./ElectionClient";
+import ElectionTable from "./ElectionTable.svelte";
 
 await setupTranslations();
 
 vi.mock("$lib/election/ElectionClient");
 
 const onChangeMock = vi.fn();
+const onAddMock = vi.fn();
 
 const ui = {
 	removeButton: ButtonLocator.withLabel("remove"),
+	addButton: ButtonLocator.withLabel("add"),
 	table: TableLocator.any()
 };
 
@@ -41,10 +43,11 @@ describe("renders", () => {
 	test("no elections", () => {
 		render(ElectionTable, {
 			target: document.body,
-			props: { elections: [], onChange: onChangeMock }
+			props: { elections: [], onChange: onChangeMock, onAdd: onAddMock }
 		});
 
 		assertThat(ui.removeButton).isDisabled();
+		assertThat(ui.addButton).isEnabled();
 		assertThat(ui.table).isInTheDocument();
 		assertThat(ui.table.rows()).hasLength(1);
 
@@ -61,11 +64,13 @@ describe("renders", () => {
 		render(ElectionTable, {
 			props: {
 				elections: [testElections[0]],
-				onChange: onChangeMock
+				onChange: onChangeMock,
+				onAdd: onAddMock
 			}
 		});
 
 		assertThat(ui.removeButton).isDisabled();
+		assertThat(ui.addButton).isEnabled();
 		assertThat(ui.table).isInTheDocument();
 		assertThat(ui.table.rows()).hasLength(2);
 
@@ -88,11 +93,13 @@ describe("renders", () => {
 		render(ElectionTable, {
 			props: {
 				elections: [testElections[0], testElections[1]],
-				onChange: onChangeMock
+				onChange: onChangeMock,
+				onAdd: onAddMock
 			}
 		});
 
 		assertThat(ui.removeButton).isDisabled();
+		assertThat(ui.addButton).isEnabled();
 		assertThat(ui.table).isInTheDocument();
 		assertThat(ui.table.rows()).hasLength(3);
 
@@ -129,7 +136,8 @@ describe("toggle all", () => {
 		render(ElectionTable, {
 			props: {
 				elections: [],
-				onChange: onChangeMock
+				onChange: onChangeMock,
+				onAdd: onAddMock
 			}
 		});
 
@@ -147,7 +155,8 @@ describe("toggle all", () => {
 		render(ElectionTable, {
 			props: {
 				elections: [testElections[0], testElections[1]],
-				onChange: onChangeMock
+				onChange: onChangeMock,
+				onAdd: onAddMock
 			}
 		});
 
@@ -177,7 +186,8 @@ describe("toggle all", () => {
 		render(ElectionTable, {
 			props: {
 				elections: [testElections[0], testElections[1]],
-				onChange: onChangeMock
+				onChange: onChangeMock,
+				onAdd: onAddMock
 			}
 		});
 
@@ -210,7 +220,8 @@ describe("toggle one", () => {
 		render(ElectionTable, {
 			props: {
 				elections: [testElections[0], testElections[1]],
-				onChange: onChangeMock
+				onChange: onChangeMock,
+				onAdd: onAddMock
 			}
 		});
 
@@ -238,7 +249,8 @@ describe("toggle one", () => {
 		render(ElectionTable, {
 			props: {
 				elections: [testElections[0], testElections[1]],
-				onChange: onChangeMock
+				onChange: onChangeMock,
+				onAdd: onAddMock
 			}
 		});
 
@@ -261,7 +273,8 @@ describe("toggle one", () => {
 		render(ElectionTable, {
 			props: {
 				elections: [testElections[0], testElections[1]],
-				onChange: onChangeMock
+				onChange: onChangeMock,
+				onAdd: onAddMock
 			}
 		});
 
@@ -294,7 +307,8 @@ describe("actions", () => {
 		render(ElectionTable, {
 			props: {
 				elections: [testElections[0]],
-				onChange: onChangeMock
+				onChange: onChangeMock,
+				onAdd: onAddMock
 			}
 		});
 
