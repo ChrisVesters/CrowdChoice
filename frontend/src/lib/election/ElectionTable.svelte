@@ -1,5 +1,4 @@
 <script lang="ts">
-	
 	import type { ChangeEventHandler } from "svelte/elements";
 
 	import { t } from "$lib/translations/index";
@@ -38,7 +37,6 @@
 
 	function showAddElectionDialog(): void {
 		isAddElectionDialogVisible = true;
-		console.log(isAddElectionDialogVisible);
 	}
 
 	function hideAddElectionDialog(): void {
