@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { goto, invalidateAll } from "$app/navigation";
-	import { t } from '$lib/translations/index';
+	import { t } from "$lib/translations/index";
 
 	import { ElectionClient } from "$lib/election/ElectionClient";
 	import ElectionTable from "$lib/election/ElectionTable.svelte";
@@ -28,8 +28,8 @@
 <h1>{$t("common.overview")}</h1>
 <h2>{$t("common.elections")}</h2>
 
-<ElectionTable elections = {data.elections} onChange = {invalidateAll}/>
-
-<h3>{$t("common.newObject", { object: $t("common.election") })}</h3>
-<input bind:value={newTopic} />
-<button onclick={handleAddElection} disabled={!isValidTopicField()}>{$t("common.add")}</button>
+<ElectionTable
+	elections={data.elections}
+	onChange={invalidateAll}
+	onAdd={electionId => goto(`/elections/${electionId}`)}
+/>
