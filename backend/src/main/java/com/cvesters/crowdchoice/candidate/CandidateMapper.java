@@ -22,7 +22,7 @@ public final class CandidateMapper {
 	public static Candidate fromDao(final CandidateDao dao) {
 		Objects.requireNonNull(dao);
 
-		return new Candidate(dao.getId(), dao.getName());
+		return new Candidate(dao.getId(), dao.getName(), dao.getDescription());
 	}
 
 	public static void updateDao(final Candidate candidate,
@@ -31,12 +31,13 @@ public final class CandidateMapper {
 		Objects.requireNonNull(dao);
 
 		dao.setName(candidate.getName());
+		dao.setDescription(candidate.getDescription());
 	}
 
 	public static Candidate fromDto(final CandidateCreateDto dto) {
 		Objects.requireNonNull(dto);
 
-		return new Candidate(dto.name());
+		return new Candidate(dto.name(), dto.description());
 	}
 
 	public static List<CandidateDto> toDto(final List<Candidate> candidates) {
@@ -48,6 +49,7 @@ public final class CandidateMapper {
 	public static CandidateDto toDto(final Candidate candidate) {
 		Objects.requireNonNull(candidate);
 
-		return new CandidateDto(candidate.getId(), candidate.getName());
+		return new CandidateDto(candidate.getId(), candidate.getName(),
+				candidate.getDescription());
 	}
 }

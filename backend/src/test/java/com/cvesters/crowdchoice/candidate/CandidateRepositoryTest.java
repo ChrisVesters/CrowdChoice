@@ -87,15 +87,18 @@ class CandidateRepositoryTest {
 	void save() {
 		final long electionId = 1L;
 		final String name = "Maven";
+		final String description = "Java build tool";
 
 		final var candidate = new CandidateDao(electionId);
 		candidate.setName(name);
+		candidate.setDescription(description);
 
 		final CandidateDao saved = candidateRepository.save(candidate);
 
 		assertThat(saved.getId()).isNotNull();
 		assertThat(saved.getElectionId()).isEqualTo(electionId);
 		assertThat(saved.getName()).isEqualTo(name);
+		assertThat(saved.getDescription()).isEqualTo(description);
 
 		final var found = entityManager.find(CandidateDao.class, saved.getId());
 		assertThat(found).isEqualTo(saved);

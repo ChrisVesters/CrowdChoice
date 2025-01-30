@@ -12,13 +12,14 @@ class CandidateTest {
 
 	private static final long ID = 1L;
 	private static final String NAME = "Spring";
+	private static final String DESCRIPTION = "Dependency injection framework";
 
 	@Nested
 	class ConstructorWithId {
 
 		@Test
 		void success() {
-			final var candidate = new Candidate(ID, NAME);
+			final var candidate = new Candidate(ID, NAME, DESCRIPTION);
 
 			assertThat(candidate.getId()).isEqualTo(ID);
 			assertThat(candidate.getName()).isEqualTo(NAME);
@@ -26,15 +27,21 @@ class CandidateTest {
 
 		@Test
 		void nameNull() {
-			assertThatThrownBy(() -> new Candidate(ID, null))
+			assertThatThrownBy(() -> new Candidate(ID, null, DESCRIPTION))
 					.isInstanceOf(NullPointerException.class);
 		}
 
 		@ParameterizedTest
 		@ValueSource(strings = { "", " " })
 		void nameInvalid(final String name) {
-			assertThatThrownBy(() -> new Candidate(ID, name))
+			assertThatThrownBy(() -> new Candidate(ID, name, DESCRIPTION))
 					.isInstanceOf(IllegalArgumentException.class);
+		}
+
+		@Test
+		void descriptionNull() {
+			assertThatThrownBy(() -> new Candidate(ID, NAME, null))
+					.isInstanceOf(NullPointerException.class);
 		}
 	}
 
@@ -42,7 +49,7 @@ class CandidateTest {
 	class ConstructorWithoutId {
 		@Test
 		void success() {
-			final var candidate = new Candidate(NAME);
+			final var candidate = new Candidate(NAME, DESCRIPTION);
 
 			assertThat(candidate.getId()).isNull();
 			assertThat(candidate.getName()).isEqualTo(NAME);
@@ -50,15 +57,21 @@ class CandidateTest {
 
 		@Test
 		void nameNull() {
-			assertThatThrownBy(() -> new Candidate(null))
+			assertThatThrownBy(() -> new Candidate(null, DESCRIPTION))
 					.isInstanceOf(NullPointerException.class);
 		}
 
 		@ParameterizedTest
 		@ValueSource(strings = { "", " " })
 		void nameInvalid(final String name) {
-			assertThatThrownBy(() -> new Candidate(name))
+			assertThatThrownBy(() -> new Candidate(name, DESCRIPTION))
 					.isInstanceOf(IllegalArgumentException.class);
+		}
+
+		@Test
+		void descriptionNull() {
+			assertThatThrownBy(() -> new Candidate(NAME, null))
+					.isInstanceOf(NullPointerException.class);
 		}
 	}
 }

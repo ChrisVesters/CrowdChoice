@@ -117,13 +117,15 @@ class CandidateControllerTest {
 		@Test
 		void success() throws Exception {
 			final TestCandidate candidate = TestCandidate.LOMBOK;
-			final String requestBody = requestJson(candidate.name());
+			final String requestBody = candidate.requestJson();
 
 			final Candidate bdo = candidate.bdo();
 
 			when(candidateService.create(eq(ELECTION_ID), argThat(request -> {
 				assertThat(request.getId()).isNull();
 				assertThat(request.getName()).isEqualTo(candidate.name());
+				assertThat(request.getDescription())
+						.isEqualTo(candidate.description());
 				return true;
 			}))).thenReturn(bdo);
 
@@ -139,7 +141,7 @@ class CandidateControllerTest {
 		@Test
 		void duplicate() throws Exception {
 			final TestCandidate candidate = TestCandidate.LOMBOK;
-			final String requestBody = requestJson(candidate.name());
+			final String requestBody = candidate.requestJson();
 
 			when(candidateService.create(eq(ELECTION_ID), argThat(request -> {
 				assertThat(request.getId()).isNull();
@@ -157,7 +159,7 @@ class CandidateControllerTest {
 		@Test
 		void electionNotFound() throws Exception {
 			final TestCandidate candidate = TestCandidate.LOMBOK;
-			final String requestBody = requestJson(candidate.name());
+			final String requestBody = candidate.requestJson();
 
 			when(candidateService.create(eq(ELECTION_ID), argThat(request -> {
 				assertThat(request.getId()).isNull();
@@ -170,14 +172,6 @@ class CandidateControllerTest {
 					.content(requestBody);
 
 			mockMvc.perform(request).andExpect(status().isNotFound());
-		}
-
-		private String requestJson(final String name) {
-			return """
-					{
-						"name": "%s"
-					}
-					""".formatted(name);
 		}
 	}
 

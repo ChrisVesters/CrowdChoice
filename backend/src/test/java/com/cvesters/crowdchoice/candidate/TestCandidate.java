@@ -12,22 +12,22 @@ import com.cvesters.crowdchoice.candidate.dao.CandidateDao;
 import com.cvesters.crowdchoice.candidate.dto.CandidateDto;
 import com.cvesters.crowdchoice.election.TestElection;
 
-public record TestCandidate(long id, TestElection election, String name) {
+public record TestCandidate(long id, TestElection election, String name, String description) {
 
 	public static final TestCandidate MICRONAUT = new TestCandidate(1,
-			TestElection.TOPICS, "Micronaut");
+			TestElection.TOPICS, "Micronaut", "Getting rid of reflection");
 	public static final TestCandidate DOCKER = new TestCandidate(2,
-			TestElection.TOPICS, "Docker");
+			TestElection.TOPICS, "Docker", "Containers");
 	public static final TestCandidate LOMBOK = new TestCandidate(3,
-			TestElection.TOPICS, "Lombok");
+			TestElection.TOPICS, "Lombok", "No more boilerplate");
 
 	public static final TestCandidate TRUMP = new TestCandidate(4,
-			TestElection.FEDERAL_ELECTIONS_2024, "Trump");
+			TestElection.FEDERAL_ELECTIONS_2024, "Trump", "Republican");
 	public static final TestCandidate BIDEN = new TestCandidate(5,
-			TestElection.FEDERAL_ELECTIONS_2024, "Biden");
+			TestElection.FEDERAL_ELECTIONS_2024, "Biden", "Democrat");
 
 	public Candidate bdo() {
-		return new Candidate(id, name);
+		return new Candidate(id, name, description);
 	}
 
 	public CandidateDao dao() {
@@ -37,6 +37,7 @@ public record TestCandidate(long id, TestElection election, String name) {
 		when(dao.getId()).thenReturn(id);
 		when(dao.getElectionId()).thenReturn(election.id());
 		when(dao.getName()).thenReturn(name);
+		when(dao.getDescription()).thenReturn(description);
 
 		return dao;
 	}
@@ -45,24 +46,37 @@ public record TestCandidate(long id, TestElection election, String name) {
 		return """
 				{
 					"id": %d,
-					"name": "%s"
+					"name": "%s",
+					"description": "%s"
 				}
-				""".formatted(id, name);
+				""".formatted(id, name, description);
+	}
+
+	public String requestJson() {
+		return """
+			{
+				"name": "%s",
+				"description": "%s"
+			}
+			""".formatted(name, description);
 	}
 
 	public void assertEquals(final CandidateDao actual) {
 		assertThat(actual.getId()).isEqualTo(id);
 		assertThat(actual.getElectionId()).isEqualTo(election.id());
 		assertThat(actual.getName()).isEqualTo(name);
+		assertThat(actual.getDescription()).isEqualTo(description);
 	}
 
 	public void assertEquals(final Candidate actual) {
 		assertThat(actual.getId()).isEqualTo(id);
 		assertThat(actual.getName()).isEqualTo(name);
+		assertThat(actual.getDescription()).isEqualTo(description);
 	}
 
 	public void assertEquals(final CandidateDto actual) {
 		assertThat(actual.id()).isEqualTo(id);
 		assertThat(actual.name()).isEqualTo(name);
+		assertThat(actual.description()).isEqualTo(description);
 	}
 }
