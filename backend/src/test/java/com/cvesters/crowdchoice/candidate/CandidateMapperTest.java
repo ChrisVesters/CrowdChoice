@@ -90,6 +90,7 @@ class CandidateMapperTest {
 			CandidateMapper.updateDao(bdo, dao);
 
 			verify(dao).setName(CANDIDATE.name());
+			verify(dao).setDescription(CANDIDATE.description());
 			verifyNoMoreInteractions(dao);
 		}
 
@@ -118,7 +119,8 @@ class CandidateMapperTest {
 		@Test
 		void success() {
 			final TestCandidate candidate = TestCandidate.MICRONAUT;
-			final var dto = new CandidateCreateDto(candidate.name());
+			final var dto = new CandidateCreateDto(candidate.name(),
+					candidate.description());
 
 			final Candidate result = CandidateMapper.fromDto(dto);
 

@@ -103,7 +103,8 @@ class CandidateServiceTest {
 
 		@Test
 		void success() {
-			final var request = new Candidate(CANDIDATE.name());
+			final var request = new Candidate(CANDIDATE.name(),
+					CANDIDATE.description());
 
 			when(candidateRepository.save(argThat(saved -> {
 				assertThat(saved.getId()).isNull();
@@ -120,7 +121,8 @@ class CandidateServiceTest {
 
 		@Test
 		void candidateAlreadyExists() {
-			final var request = new Candidate(CANDIDATE.name());
+			final var request = new Candidate(CANDIDATE.name(),
+					CANDIDATE.description());
 
 			when(candidateRepository.existsByElectionIdAndName(ELECTION_ID,
 					CANDIDATE.name())).thenReturn(true);
@@ -136,7 +138,8 @@ class CandidateServiceTest {
 
 		@Test
 		void electionNotFound() {
-			final var request = new Candidate(CANDIDATE.name());
+			final var request = new Candidate(CANDIDATE.name(),
+					CANDIDATE.description());
 			doThrow(new NotFoundException()).when(electionService)
 					.verifyExists(ELECTION_ID);
 
