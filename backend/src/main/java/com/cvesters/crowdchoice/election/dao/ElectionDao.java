@@ -22,4 +22,6 @@ public class ElectionDao {
 	private Long id;
 
 	private String topic;
+
+	private String description;
 }

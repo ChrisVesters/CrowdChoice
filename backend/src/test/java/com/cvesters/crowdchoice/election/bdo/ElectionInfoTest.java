@@ -12,29 +12,53 @@ public class ElectionInfoTest {
 
 	private static final long ID = 344L;
 	private static final String TOPIC = "Topic";
+	private static final String DESCRIPTION = "Description";
 
 	@Nested
 	class ConstructorWithId {
 
 		@Test
 		void success() {
-			final var info = new ElectionInfo(ID, TOPIC);
+			final var info = new ElectionInfo(ID, TOPIC, DESCRIPTION);
 
 			assertThat(info.getId()).isEqualTo(ID);
+			assertThat(info.getTopic()).isEqualTo(TOPIC);
+			assertThat(info.getDescription()).isEqualTo(DESCRIPTION);
+		}
+
+		@Test
+		void topicTrimmed() {
+			final var info = new ElectionInfo(ID, "  " + TOPIC + "  ",
+					DESCRIPTION);
+
 			assertThat(info.getTopic()).isEqualTo(TOPIC);
 		}
 
 		@Test
+		void descriptionTrimmed() {
+			final var info = new ElectionInfo(ID, TOPIC,
+					"  " + DESCRIPTION + "  ");
+
+			assertThat(info.getDescription()).isEqualTo(DESCRIPTION);
+		}
+
+		@Test
 		void topicNull() {
-			assertThatThrownBy(() -> new ElectionInfo(ID, null))
+			assertThatThrownBy(() -> new ElectionInfo(ID, null, DESCRIPTION))
 					.isInstanceOf(NullPointerException.class);
 		}
 
 		@ParameterizedTest
 		@ValueSource(strings = { "", " " })
 		void topicInvalid(final String topic) {
-			assertThatThrownBy(() -> new ElectionInfo(ID, topic))
+			assertThatThrownBy(() -> new ElectionInfo(ID, topic, DESCRIPTION))
 					.isInstanceOf(IllegalArgumentException.class);
+		}
+
+		@Test
+		void descriptionNull() {
+			assertThatThrownBy(() -> new ElectionInfo(ID, TOPIC, null))
+					.isInstanceOf(NullPointerException.class);
 		}
 	}
 
@@ -43,22 +67,37 @@ public class ElectionInfoTest {
 
 		@Test
 		void success() {
-			final var info = new ElectionInfo(TOPIC);
+			final var info = new ElectionInfo(TOPIC, DESCRIPTION);
 
 			assertThat(info.getId()).isNull();
+			assertThat(info.getTopic()).isEqualTo(TOPIC);
+			assertThat(info.getDescription()).isEqualTo(DESCRIPTION);
+		}
+
+		@Test
+		void topicTrimmed() {
+			final var info = new ElectionInfo("  " + TOPIC + "  ", DESCRIPTION);
+
 			assertThat(info.getTopic()).isEqualTo(TOPIC);
 		}
 
 		@Test
+		void descriptionTrimmed() {
+			final var info = new ElectionInfo(TOPIC, "  " + DESCRIPTION + "  ");
+
+			assertThat(info.getDescription()).isEqualTo(DESCRIPTION);
+		}
+
+		@Test
 		void topicNull() {
-			assertThatThrownBy(() -> new ElectionInfo(null))
+			assertThatThrownBy(() -> new ElectionInfo(null, DESCRIPTION))
 					.isInstanceOf(NullPointerException.class);
 		}
 
 		@ParameterizedTest
 		@ValueSource(strings = { "", " " })
 		void topicInvalid(final String topic) {
-			assertThatThrownBy(() -> new ElectionInfo(topic))
+			assertThatThrownBy(() -> new ElectionInfo(topic, DESCRIPTION))
 					.isInstanceOf(IllegalArgumentException.class);
 		}
 	}
