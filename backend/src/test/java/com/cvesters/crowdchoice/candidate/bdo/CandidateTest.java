@@ -26,6 +26,22 @@ class CandidateTest {
 		}
 
 		@Test
+		void nameTrimmed() {
+			final var candidate = new Candidate(ID, "  " + NAME + "  ",
+					DESCRIPTION);
+
+			assertThat(candidate.getName()).isEqualTo(NAME);
+		}
+
+		@Test
+		void descriptionTrimmed() {
+			final var candidate = new Candidate(ID, NAME,
+					"  " + DESCRIPTION + "  ");
+
+			assertThat(candidate.getDescription()).isEqualTo(DESCRIPTION);
+		}
+
+		@Test
 		void nameNull() {
 			assertThatThrownBy(() -> new Candidate(ID, null, DESCRIPTION))
 					.isInstanceOf(NullPointerException.class);
@@ -47,12 +63,29 @@ class CandidateTest {
 
 	@Nested
 	class ConstructorWithoutId {
+
 		@Test
 		void success() {
 			final var candidate = new Candidate(NAME, DESCRIPTION);
 
 			assertThat(candidate.getId()).isNull();
 			assertThat(candidate.getName()).isEqualTo(NAME);
+		}
+
+		@Test
+		void nameTrimmed() {
+			final var candidate = new Candidate("  " + NAME + "  ",
+					DESCRIPTION);
+
+			assertThat(candidate.getName()).isEqualTo(NAME);
+		}
+
+		@Test
+		void descriptionTrimmed() {
+			final var candidate = new Candidate(NAME,
+					"  " + DESCRIPTION + "  ");
+
+			assertThat(candidate.getDescription()).isEqualTo(DESCRIPTION);
 		}
 
 		@Test

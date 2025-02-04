@@ -19,8 +19,8 @@ public class Candidate {
 		Objects.requireNonNull(description);
 
 		this.id = id;
-		this.name = name;
-		this.description = description;
+		this.name = name.trim();
+		this.description = description.trim();
 	}
 
 	public Candidate(final long id, final String name, final String description) {

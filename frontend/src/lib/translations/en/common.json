@@ -4,6 +4,7 @@
 	"cancel": "cancel",
 	"candidate": "candidate",
 	"candidates": "candidates",
+	"description": "description",
 	"election": "election",
 	"elections": "elections",
 	"newObject": "new {{object}}",
