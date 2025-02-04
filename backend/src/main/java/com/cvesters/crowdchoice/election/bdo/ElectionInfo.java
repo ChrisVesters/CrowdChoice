@@ -11,20 +11,25 @@ public class ElectionInfo {
 
 	private Long id;
 	private String topic;
+	private String description;
 
-	private ElectionInfo(final Long id, final String topic) {
+	private ElectionInfo(final Long id, final String topic,
+			final String description) {
 		Objects.requireNonNull(topic);
 		Validate.notBlank(topic);
+		Objects.requireNonNull(description);
 
 		this.id = id;
-		this.topic = topic;
+		this.topic = topic.trim();
+		this.description = description.trim();
 	}
 
-	public ElectionInfo(final long id, final String topic) {
-		this(Long.valueOf(id), topic);
+	public ElectionInfo(final long id, final String topic,
+			final String description) {
+		this(Long.valueOf(id), topic, description);
 	}
 
-	public ElectionInfo(final String topic) {
-		this(null, topic);
+	public ElectionInfo(final String topic, final String description) {
+		this(null, topic, description);
 	}
 }

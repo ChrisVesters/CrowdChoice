@@ -73,9 +73,11 @@ class ElectionRepositoryTest {
 	@Test
 	void save() {
 		final String topic = "Election";
+		final String description = "Description";
 
 		final var election = new ElectionDao();
 		election.setTopic(topic);
+		election.setDescription(description);
 
 		final ElectionDao saved = electionRepository.save(election);
 

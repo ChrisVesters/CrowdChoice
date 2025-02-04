@@ -123,7 +123,8 @@ class ElectionServiceTest {
 		@Test
 		void create() {
 			final var election = TestElection.TOPICS;
-			final var request = new ElectionInfo(election.topic());
+			final var request = new ElectionInfo(election.topic(),
+					election.description());
 			final ElectionDao expectedDao = election.dao();
 
 			when(electionRepository.save(argThat(dao -> {

@@ -1,8 +1,8 @@
-INSERT INTO elections(id, topic)
+INSERT INTO elections(id, topic, description)
 OVERRIDING SYSTEM VALUE
 VALUES 
-	(1, 'Topics'),
-	(2, 'Federal Elections 2024');
+	(1, 'Topics', ''),
+	(2, 'Federal Elections 2024', 'Choose a new president.');
 
 SELECT setval('elections_id_seq', (SELECT MAX(id) from "elections"));
 

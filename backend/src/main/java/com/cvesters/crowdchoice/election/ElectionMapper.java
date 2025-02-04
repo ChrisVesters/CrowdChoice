@@ -22,7 +22,8 @@ public final class ElectionMapper {
 	public static ElectionInfo fromDao(final ElectionDao dao) {
 		Objects.requireNonNull(dao);
 
-		return new ElectionInfo(dao.getId(), dao.getTopic());
+		return new ElectionInfo(dao.getId(), dao.getTopic(),
+				dao.getDescription());
 	}
 
 	public static void updateDao(final ElectionInfo election,
@@ -31,12 +32,13 @@ public final class ElectionMapper {
 		Objects.requireNonNull(dao);
 
 		dao.setTopic(election.getTopic());
+		dao.setDescription(election.getDescription());
 	}
 
 	public static ElectionInfo fromDto(final ElectionCreateDto dto) {
 		Objects.requireNonNull(dto);
 
-		return new ElectionInfo(dto.topic());
+		return new ElectionInfo(dto.topic(), dto.description());
 	}
 
 	public static List<ElectionInfoDto> toDto(
@@ -51,7 +53,8 @@ public final class ElectionMapper {
 
 		final long id = election.getId();
 		final String topic = election.getTopic();
+		final String description = election.getDescription();
 
-		return new ElectionInfoDto(id, topic);
+		return new ElectionInfoDto(id, topic, description);
 	}
 }

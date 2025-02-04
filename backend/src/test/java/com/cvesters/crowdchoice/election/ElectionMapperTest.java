@@ -78,6 +78,7 @@ class ElectionMapperTest {
 
 			assertThat(dao.getId()).isNull();
 			assertThat(dao.getTopic()).isEqualTo(election.topic());
+			assertThat(dao.getDescription()).isEqualTo(election.description());
 		}
 
 		@Test
@@ -89,6 +90,7 @@ class ElectionMapperTest {
 			ElectionMapper.updateDao(bdo, dao);
 
 			verify(dao).setTopic(election.topic());
+			verify(dao).setDescription(election.description());
 			verifyNoMoreInteractions(dao);
 		}
 
@@ -116,12 +118,14 @@ class ElectionMapperTest {
 		@Test
 		void success() {
 			final TestElection election = TestElection.TOPICS;
-			final var dto = new ElectionCreateDto(election.topic());
+			final var dto = new ElectionCreateDto(election.topic(),
+					election.description());
 
 			final ElectionInfo info = ElectionMapper.fromDto(dto);
 
 			assertThat(info.getId()).isNull();
 			assertThat(info.getTopic()).isEqualTo(election.topic());
+			assertThat(info.getDescription()).isEqualTo(election.description());
 		}
 
 		@Test
@@ -141,8 +145,7 @@ class ElectionMapperTest {
 
 			final ElectionInfoDto dto = ElectionMapper.toDto(info);
 
-			assertThat(dto.id()).isEqualTo(election.id());
-			assertThat(dto.topic()).isEqualTo(election.topic());
+			election.assertEquals(dto);
 		}
 
 		@Test
