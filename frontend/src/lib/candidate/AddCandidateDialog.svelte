@@ -46,7 +46,6 @@
 			name="name"
 			required
 		/>
-		<br />
 		<label for="description">{$t("common.description")}</label>
 		<textarea
 			bind:this={descriptionField}

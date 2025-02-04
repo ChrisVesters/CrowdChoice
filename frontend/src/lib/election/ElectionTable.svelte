@@ -5,7 +5,7 @@
 
 	import AddElectionDialog from "./AddElectionDialog.svelte";
 	import { ElectionClient } from "./ElectionClient";
-	import type { Election } from "./ElectionTypes";
+	import type { CreateElectionRequest, Election } from "./ElectionTypes";
 
 	export type ElectionTableProps = {
 		elections: Election[];
@@ -43,9 +43,11 @@
 		isAddElectionDialogVisible = false;
 	}
 
-	function addElection(topic: string): void {
+	function addElection(request: CreateElectionRequest): void {
 		hideAddElectionDialog();
-		ElectionClient.create(topic).then(election => props.onAdd(election.id));
+		ElectionClient.create(request).then(election =>
+			props.onAdd(election.id)
+		);
 	}
 </script>
 
@@ -69,6 +71,7 @@
 				/>
 			</th>
 			<th>{$t("common.topic")}</th>
+			<th>{$t("common.description")}</th>
 		</tr>
 	</thead>
 
@@ -86,6 +89,7 @@
 				<td>
 					<a href="/elections/{election.id}">{election.topic}</a>
 				</td>
+				<td>{election.description}</td>
 			</tr>
 		{/each}
 	</tbody>
