@@ -6,7 +6,7 @@
 	import { CandidateClient } from "./CandidateClient";
 
 	import AddCandidateDialog from "./AddCandidateDialog.svelte";
-	import type { Candidate } from "./CandidateTypes";
+	import type { Candidate, CreateCandidateRequest } from "./CandidateTypes";
 
 	export type CandidateTableprops = {
 		electionId: number;
@@ -47,9 +47,9 @@
 		isAddCandidateDialogVisible = false;
 	}
 
-	function addCandidate(name: string): void {
+	function addCandidate(request: CreateCandidateRequest): void {
 		hideAddCandidateDialog();
-		CandidateClient.create(props.electionId, name).then(candidate =>
+		CandidateClient.create(props.electionId, request).then(candidate =>
 			props.onAdd(candidate.id)
 		);
 	}
@@ -75,6 +75,7 @@
 				/>
 			</th>
 			<th>{$t("common.name")}</th>
+			<th>{$t("common.description")}</th>
 		</tr>
 	</thead>
 
@@ -90,6 +91,7 @@
 					/>
 				</td>
 				<td> {candidate.name} </td>
+				<td> {candidate.description} </td>
 			</tr>
 		{/each}
 	</tbody>
