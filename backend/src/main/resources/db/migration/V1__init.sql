@@ -16,3 +16,12 @@ CREATE TABLE candidates(
 	FOREIGN KEY(election_id) REFERENCES elections(id) ON DELETE CASCADE,
 	UNIQUE(election_id, name)
 );
+
+CREATE TABLE votes(
+	id BIGINT NOT NULL GENERATED ALWAYS AS IDENTITY,
+	casted_on TIMESTAMP WITH TIME ZONE NOT NULL,
+	candidate_id BIGINT NOT NULL,
+
+	PRIMARY KEY(id),
+	FOREIGN KEY(candidate_id) REFERENCES candidates(id) ON DELETE CASCADE
+);
