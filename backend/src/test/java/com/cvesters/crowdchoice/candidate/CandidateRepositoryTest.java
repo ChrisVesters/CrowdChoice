@@ -1,6 +1,7 @@
 package com.cvesters.crowdchoice.candidate;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.util.List;
 import java.util.Optional;
@@ -16,6 +17,7 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.test.context.jdbc.Sql;
 
 import com.cvesters.crowdchoice.PostgresContainerConfig;
@@ -76,7 +78,7 @@ class CandidateRepositoryTest {
 	void findByElectionIdAndIdNotFound() {
 		final var candidate = TestCandidate.TRUMP;
 		final long electionId = candidate.election().id();
-		
+
 		final Optional<CandidateDao> found = candidateRepository
 				.findByElectionIdAndId(electionId, Long.MAX_VALUE);
 
@@ -105,13 +107,43 @@ class CandidateRepositoryTest {
 	}
 
 	@Test
+	void saveForNonExistingElection() {
+		final long electionId = Long.MAX_VALUE;
+		final String name = "Maven";
+		final String description = "Java build tool";
+
+		final var candidate = new CandidateDao(electionId);
+		candidate.setName(name);
+		candidate.setDescription(description);
+
+		assertThatThrownBy(() -> candidateRepository.save(candidate))
+				.isInstanceOf(DataIntegrityViolationException.class);
+	}
+
+	@Test
+	void saveWithDuplicateName() {
+		final long electionId = 1L;
+		final String name = "Docker";
+		final String description = "No dependencies on your system anymore";
+
+		final var candidate = new CandidateDao(electionId);
+		candidate.setName(name);
+		candidate.setDescription(description);
+
+		assertThatThrownBy(() -> candidateRepository.save(candidate))
+				.isInstanceOf(DataIntegrityViolationException.class);
+	}
+
+	@Test
 	void delete() {
 		final long candidateId = 1L;
-		final CandidateDao dao = entityManager.find(CandidateDao.class, candidateId);
+		final CandidateDao dao = entityManager.find(CandidateDao.class,
+				candidateId);
 
 		candidateRepository.delete(dao);
 
 		assertThat(entityManager.contains(dao)).isFalse();
-		assertThat(entityManager.find(CandidateDao.class, candidateId)).isNull();
+		assertThat(entityManager.find(CandidateDao.class, candidateId))
+				.isNull();
 	}
 }
