@@ -1,6 +1,7 @@
 package com.cvesters.crowdchoice.candidate;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatNoException;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
@@ -194,6 +195,28 @@ class CandidateServiceTest {
 							.isInstanceOf(NotFoundException.class);
 
 			verify(candidateRepository, never()).delete(any());
+		}
+	}
+
+	@Nested
+	class VerifyExists {
+
+		@Test
+		void exists() {
+			when(candidateRepository.existsByElectionIdAndId(ELECTION_ID,
+					CANDIDATE_ID)).thenReturn(true);
+
+			assertThatNoException().isThrownBy(() -> candidateService
+					.verifyExists(ELECTION_ID, CANDIDATE_ID));
+		}
+
+		@Test
+		void doesNotExist() {
+			when(candidateRepository.existsByElectionIdAndId(ELECTION_ID,
+					CANDIDATE_ID)).thenReturn(false);
+
+			assertThatThrownBy(() -> candidateService.verifyExists(ELECTION_ID,
+					CANDIDATE_ID)).isInstanceOf(NotFoundException.class);
 		}
 	}
 }
