@@ -58,4 +58,10 @@ public class CandidateService {
 
 		candidateRepository.delete(candidate);
 	}
+
+	public void verifyExists(final long electionId, final long candidateId) {
+		if (!candidateRepository.existsByElectionIdAndId(electionId, candidateId)) {
+			throw new NotFoundException();
+		}
+	}
 }

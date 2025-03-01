@@ -146,4 +146,31 @@ class CandidateRepositoryTest {
 		assertThat(entityManager.find(CandidateDao.class, candidateId))
 				.isNull();
 	}
+
+	@Test
+	void existsById() {
+		final long electionId = 1L;
+		final long candidateId = 1L;
+
+		assertThat(candidateRepository.existsByElectionIdAndId(electionId,
+				candidateId)).isTrue();
+	}
+
+	@Test
+	void existsByIdNonExistingElection() {
+		final long electionId = Long.MAX_VALUE;
+		final long candidateId = 1L;
+
+		assertThat(candidateRepository.existsByElectionIdAndId(electionId,
+				candidateId)).isFalse();
+	}
+
+	@Test
+	void existsByIdNonExistingCandidate() {
+		final long electionId = 1L;
+		final long candidateId = Long.MAX_VALUE;
+
+		assertThat(candidateRepository.existsByElectionIdAndId(electionId,
+				candidateId)).isFalse();
+	}
 }
