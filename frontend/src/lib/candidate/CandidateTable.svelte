@@ -68,6 +68,7 @@
 			<th>
 				<input
 					style:vertical-align="text-bottom"
+					class="fullWidth"
 					type="checkbox"
 					onchange={toggleAll}
 					checked={props.candidates.length > 0 &&
@@ -84,8 +85,9 @@
 			<tr>
 				<td>
 					<input
-						style:vertical-align="text-bottom"
 						bind:group={selected}
+						style:vertical-align="text-bottom"
+						class="fullWidth"
 						type="checkbox"
 						value={candidate.id}
 					/>
