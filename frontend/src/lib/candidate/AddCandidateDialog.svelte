@@ -41,6 +41,7 @@
 		<label for="name">{$t("common.name")}</label>
 		<input
 			bind:this={nameField}
+			class="fullWidth"
 			type="text"
 			id="name"
 			name="name"
@@ -49,6 +50,7 @@
 		<label for="description">{$t("common.description")}</label>
 		<textarea
 			bind:this={descriptionField}
+			class="fullWidth"
 			id="description"
 			name="description"
 			rows=3

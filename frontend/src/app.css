@@ -60,11 +60,10 @@ button:hover {
 	opacity: 0.8;
 }
 
-input {
-	width: 100%;
-}
-
 textarea {
 	resize: none;
+}
+
+.fullWidth {
 	width: 100%;
 }

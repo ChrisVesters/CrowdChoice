@@ -14,7 +14,6 @@ export async function load({ params }): Promise<ElectionPageProps> {
 		throw new Error("Invalid ID");
 	}
 
-	// TODO: fetch candidates.
 	return {
 		info: await ElectionClient.get(id),
 		candidates: await CandidateClient.getAll(id)
