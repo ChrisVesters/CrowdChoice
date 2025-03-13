@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.time.ZonedDateTime;
+import java.util.List;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
@@ -19,6 +20,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.test.context.jdbc.Sql;
 
 import com.cvesters.crowdchoice.PostgresContainerConfig;
+import com.cvesters.crowdchoice.vote.dao.VoteCountView;
 import com.cvesters.crowdchoice.vote.dao.VoteDao;
 
 @Sql({ "/db/elections.sql", "/db/votes.sql" })
@@ -32,6 +34,41 @@ class VoteRepositoryTest {
 
 	@PersistenceContext
 	private EntityManager entityManager;
+
+	@Nested
+	class GetCounts {
+
+		private static final long ELECTION_ID = 2L;
+
+		@Test
+		void success() {
+			final List<VoteCountView> overview = voteRepository
+					.getCounts(ELECTION_ID);
+
+			assertThat(overview).hasSize(2).satisfiesOnlyOnce(v -> {
+				assertThat(v.getCandidateId()).isEqualTo(4L);
+				assertThat(v.getVoteCount()).isEqualTo(1);
+			}).satisfiesOnlyOnce(v -> {
+				assertThat(v.getCandidateId()).isEqualTo(5L);
+				assertThat(v.getVoteCount()).isEqualTo(2);
+			});
+		}
+
+		@Test
+		void noVotes() {
+			final List<VoteCountView> overview = voteRepository.getCounts(1L);
+
+			assertThat(overview).isEmpty();
+		}
+
+		@Test
+		void electionDoesNotExist() {
+			final List<VoteCountView> overview = voteRepository
+					.getCounts(Integer.MAX_VALUE);
+
+			assertThat(overview).isEmpty();
+		}
+	}
 
 	@Nested
 	class Save {

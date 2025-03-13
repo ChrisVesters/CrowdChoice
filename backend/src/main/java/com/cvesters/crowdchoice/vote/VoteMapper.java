@@ -1,10 +1,13 @@
 package com.cvesters.crowdchoice.vote;
 
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 import java.util.Objects;
 
 import com.cvesters.crowdchoice.vote.bdo.Vote;
+import com.cvesters.crowdchoice.vote.dao.VoteCountView;
 import com.cvesters.crowdchoice.vote.dao.VoteDao;
+import com.cvesters.crowdchoice.vote.dto.VoteCountDto;
 import com.cvesters.crowdchoice.vote.dto.VoteCreateDto;
 import com.cvesters.crowdchoice.vote.dto.VoteDto;
 
@@ -33,4 +36,16 @@ public final class VoteMapper {
 		return new VoteDto(vote.getId(), castedOn, vote.getCandidateId());
 	}
 
+	public static List<VoteCountDto> countView(
+			final List<VoteCountView> views) {
+		Objects.requireNonNull(views);
+
+		return views.stream().map(VoteMapper::countView).toList();
+	}
+
+	public static VoteCountDto countView(final VoteCountView view) {
+		Objects.requireNonNull(view);
+
+		return new VoteCountDto(view.getCandidateId(), view.getVoteCount());
+	}
 }

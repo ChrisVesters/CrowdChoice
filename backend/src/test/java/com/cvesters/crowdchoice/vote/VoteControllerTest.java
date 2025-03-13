@@ -5,21 +5,26 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.RequestBuilder;
+
+import com.cvesters.crowdchoice.vote.dao.VoteCountView;
 
 @WebMvcTest(VoteController.class)
 class VoteControllerTest {
@@ -31,8 +36,60 @@ class VoteControllerTest {
 	@Autowired
 	private MockMvc mockMvc;
 
-	@MockBean
+	@MockitoBean
 	private VoteService voteService;
+
+	@Nested
+	class GetCounts {
+
+		@Test
+		void success() throws Exception {
+			final long candidate1Id = 2L;
+			final long candiate1Votes = 10L;
+
+			final long candidate2Id = 3L;
+			final long candiate2Votes = 7L;
+
+			final var candidate1Votes = mock(VoteCountView.class);
+			when(candidate1Votes.getCandidateId()).thenReturn(candidate1Id);
+			when(candidate1Votes.getVoteCount()).thenReturn(candiate1Votes);
+
+			final var candidate2Votes = mock(VoteCountView.class);
+			when(candidate2Votes.getCandidateId()).thenReturn(candidate2Id);
+			when(candidate2Votes.getVoteCount()).thenReturn(candiate2Votes);
+
+			when(voteService.getCounts(ELECTION_ID))
+					.thenReturn(List.of(candidate1Votes, candidate2Votes));
+
+			final RequestBuilder request = get(BASE_URL);
+
+			mockMvc.perform(request)
+					.andExpect(status().isOk())
+					.andExpect(content().json("""
+							[
+								{
+									"candidateId": %d,
+									"voteCount": %d
+								},
+								{
+									"candidateId": %d,
+									"voteCount": %d
+								}
+							]
+									""".formatted(candidate1Id, candiate1Votes,
+							candidate2Id, candiate2Votes)));
+		}
+
+		@Test
+		void error() throws Exception {
+			when(voteService.getCounts(ELECTION_ID))
+					.thenThrow(RuntimeException.class);
+
+			final RequestBuilder request = get(BASE_URL);
+
+			mockMvc.perform(request).andExpect(status().is5xxServerError());
+		}
+	}
 
 	@Nested
 	class CreateVote {
