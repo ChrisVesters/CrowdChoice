@@ -20,8 +20,8 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.RequestBuilder;
 
@@ -36,7 +36,7 @@ class ElectionControllerTest {
 	@Autowired
 	protected MockMvc mockMvc;
 
-	@MockBean
+	@MockitoBean
 	private ElectionService electionService;
 
 	@Nested
@@ -130,11 +130,14 @@ class ElectionControllerTest {
 		@Test
 		void success() throws Exception {
 			final TestElection election = TestElection.TOPICS;
-			final String requestBody = requestJson(election.topic());
+			final String requestBody = requestJson(election.topic(),
+					election.description());
 
 			when(electionService.create(argThat(request -> {
 				assertThat(request.getId()).isNull();
 				assertThat(request.getTopic()).isEqualTo(election.topic());
+				assertThat(request.getDescription())
+						.isEqualTo(election.description());
 				return true;
 			}))).thenReturn(election.info());
 
@@ -157,7 +160,7 @@ class ElectionControllerTest {
 
 		@Test
 		void invalid() throws Exception {
-			final String requestBody = requestJson("");
+			final String requestBody = requestJson("", "");
 
 			final RequestBuilder request = post(BASE_URL)
 					.contentType(MediaType.APPLICATION_JSON_VALUE)
@@ -169,7 +172,8 @@ class ElectionControllerTest {
 		@Test
 		void error() throws Exception {
 			final TestElection election = TestElection.TOPICS;
-			final String requestBody = requestJson(election.topic());
+			final String requestBody = requestJson(election.topic(),
+					election.description());
 
 			when(electionService.create(any()))
 					.thenThrow(RuntimeException.class);
@@ -181,12 +185,14 @@ class ElectionControllerTest {
 			mockMvc.perform(request).andExpect(status().is5xxServerError());
 		}
 
-		private String requestJson(final String topic) {
+		private String requestJson(final String topic,
+				final String description) {
 			return """
 					{
-						"topic": "%s"
+						"topic": "%s",
+						"description": "%s"
 					}
-					""".formatted(topic);
+					""".formatted(topic, description);
 		}
 	}
 
