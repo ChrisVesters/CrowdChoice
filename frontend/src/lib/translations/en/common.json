@@ -11,5 +11,7 @@
 	"overview": "overview",
 	"remove": "remove",
 	"topic": "topic",
-	"name": "name"
+	"name": "name",
+	"vote": "vote",
+	"votes": "votes"
 }
