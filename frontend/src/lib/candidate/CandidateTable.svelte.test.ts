@@ -17,20 +17,23 @@ await setupTranslations();
 vi.mock("$lib/candidate/CandidateClient");
 
 const onChangeMock = vi.fn();
+const onAddMock = vi.fn();
 
 const ui = {
 	removeButton: ButtonLocator.withLabel("remove"),
 	table: TableLocator.any()
 };
 
-const testCandidates: Candidate[] = [
+const testCandidates: Array<Candidate> = [
 	{
 		id: 1,
-		name: "Java"
+		name: "Java",
+		description: "High level language"
 	},
 	{
 		id: 2,
-		name: "C#"
+		name: "C#",
+		description: "Next level C++"
 	}
 ];
 
@@ -42,7 +45,12 @@ describe("renders", () => {
 	test("no candidates", () => {
 		render(CandidateTable, {
 			target: document.body,
-			props: { electionId: 1, candidates: [], onChange: onChangeMock }
+			props: {
+				electionId: 1,
+				candidates: [],
+				onChange: onChangeMock,
+				onAdd: onAddMock
+			}
 		});
 
 		assertThat(ui.removeButton).isDisabled();
@@ -63,7 +71,8 @@ describe("renders", () => {
 			props: {
 				electionId: 1,
 				candidates: [testCandidates[0]],
-				onChange: onChangeMock
+				onChange: onChangeMock,
+				onAdd: onAddMock
 			}
 		});
 
@@ -91,7 +100,8 @@ describe("renders", () => {
 			props: {
 				electionId: 1,
 				candidates: [testCandidates[0], testCandidates[1]],
-				onChange: onChangeMock
+				onChange: onChangeMock,
+				onAdd: onAddMock
 			}
 		});
 
@@ -131,7 +141,8 @@ describe("toggle all", () => {
 			props: {
 				electionId: 1,
 				candidates: [],
-				onChange: onChangeMock
+				onChange: onChangeMock,
+				onAdd: onAddMock
 			}
 		});
 
@@ -150,7 +161,8 @@ describe("toggle all", () => {
 			props: {
 				electionId: 1,
 				candidates: [testCandidates[0], testCandidates[1]],
-				onChange: onChangeMock
+				onChange: onChangeMock,
+				onAdd: onAddMock
 			}
 		});
 
@@ -181,7 +193,8 @@ describe("toggle all", () => {
 			props: {
 				electionId: 1,
 				candidates: [testCandidates[0], testCandidates[1]],
-				onChange: onChangeMock
+				onChange: onChangeMock,
+				onAdd: onAddMock
 			}
 		});
 
@@ -215,7 +228,8 @@ describe("toggle one", () => {
 			props: {
 				electionId: 1,
 				candidates: [testCandidates[0], testCandidates[1]],
-				onChange: onChangeMock
+				onChange: onChangeMock,
+				onAdd: onAddMock
 			}
 		});
 
@@ -244,7 +258,8 @@ describe("toggle one", () => {
 			props: {
 				electionId: 1,
 				candidates: [testCandidates[0], testCandidates[1]],
-				onChange: onChangeMock
+				onChange: onChangeMock,
+				onAdd: onAddMock
 			}
 		});
 
@@ -268,7 +283,8 @@ describe("toggle one", () => {
 			props: {
 				electionId: 1,
 				candidates: [testCandidates[0], testCandidates[1]],
-				onChange: onChangeMock
+				onChange: onChangeMock,
+				onAdd: onAddMock
 			}
 		});
 
@@ -302,7 +318,8 @@ describe("actions", () => {
 			props: {
 				electionId: 1,
 				candidates: [testCandidates[0]],
-				onChange: onChangeMock
+				onChange: onChangeMock,
+				onAdd: onAddMock
 			}
 		});
 

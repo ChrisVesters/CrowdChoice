@@ -8,14 +8,14 @@
 	import type { CreateElectionRequest, Election } from "./ElectionTypes";
 
 	export type ElectionTableProps = {
-		elections: Election[];
+		elections: Array<Election>;
 		onChange: () => void;
 		onAdd: (id: number) => void;
 	};
 
 	const props: ElectionTableProps = $props();
 
-	let selected: number[] = $state([]);
+	let selected: Array<number> = $state([]);
 	let isAddElectionDialogVisible: boolean = $state(false);
 
 	const toggleAll: ChangeEventHandler<HTMLInputElement> = e => {

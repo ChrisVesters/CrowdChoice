@@ -10,14 +10,14 @@
 
 	export type CandidateTableprops = {
 		electionId: number;
-		candidates: Candidate[];
+		candidates: Array<Candidate>;
 		onChange: () => void;
 		onAdd: (id: number) => void;
 	};
 
 	const props: CandidateTableprops = $props();
 
-	let selected: number[] = $state([]);
+	let selected: Array<number> = $state([]);
 	let isAddCandidateDialogVisible: boolean = $state(false);
 
 	const toggleAll: ChangeEventHandler<HTMLInputElement> = e => {

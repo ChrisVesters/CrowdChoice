@@ -7,7 +7,7 @@
 
 	export type VoteFormProps = {
 		electionId: number;
-		candidates: Candidate[];
+		candidates: Array<Candidate>;
 	};
 
 	const props: VoteFormProps = $props();
