@@ -1,11 +1,16 @@
-import type { Candidate } from "$lib/candidate/CandidateTypes.js";
 import { CandidateClient } from "$lib/candidate/CandidateClient.js";
+import type { Candidate } from "$lib/candidate/CandidateTypes.js";
+
 import { ElectionClient } from "$lib/election/ElectionClient";
 import type { Election } from "$lib/election/ElectionTypes.js";
 
+import { VoteClient } from "$lib/vote/VoteClient";
+import type { VoteCount } from "$lib/vote/VoteTypes";
+
 export type ElectionPageProps = {
-	info: Election,
-	candidates: Array<Candidate>
+	info: Election;
+	candidates: Array<Candidate>;
+	voteCounts: Array<VoteCount>;
 };
 
 export async function load({ params }): Promise<ElectionPageProps> {
@@ -16,6 +21,7 @@ export async function load({ params }): Promise<ElectionPageProps> {
 
 	return {
 		info: await ElectionClient.get(id),
-		candidates: await CandidateClient.getAll(id)
-	}
+		candidates: await CandidateClient.getAll(id),
+		voteCounts: await VoteClient.getCounts(id)
+	};
 }

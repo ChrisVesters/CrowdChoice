@@ -7,3 +7,8 @@ export type Vote = {
 export type CreateVoteRequest = {
 	candidateId: number;
 }
+
+export type VoteCount = {
+	candidateId: number;
+	voteCount: number;
+}

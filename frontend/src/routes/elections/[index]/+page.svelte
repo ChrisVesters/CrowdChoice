@@ -3,6 +3,7 @@
 	import { t } from "$lib/translations/index";
 
 	import CandidateTable from "$lib/candidate/CandidateTable.svelte";
+	import VoteCountTable from "$lib/vote/VoteCountTable.svelte";
 
 	const { data } = $props();
 
@@ -41,6 +42,10 @@
 		/>
 	{:else if tab === "votes"}
 		<h2>{$t("common.votes")}</h2>
-		<p>votes</p>
+		<VoteCountTable
+			electionId={data.info.id}
+			candidates={data.candidates}
+			voteCounts={data.voteCounts}
+		/>
 	{/if}
 </div>

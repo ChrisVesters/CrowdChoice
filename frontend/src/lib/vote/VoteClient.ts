@@ -1,6 +1,12 @@
-import type { CreateVoteRequest, Vote } from "./VoteTypes";
+import type { CreateVoteRequest, Vote, VoteCount } from "./VoteTypes";
 
 export class VoteClient {
+	public static async getCounts(
+		electionId: number
+	): Promise<Array<VoteCount>> {
+		return fetch(`${getEndpoint(electionId)}`).then(res => res.json());
+	}
+
 	public static async create(
 		electionId: number,
 		request: CreateVoteRequest
