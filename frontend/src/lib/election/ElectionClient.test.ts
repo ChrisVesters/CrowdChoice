@@ -1,4 +1,4 @@
-import { test, expect, vi } from 'vitest';
+import { test, expect, vi } from "vitest";
 
 import { ElectionClient } from "./ElectionClient";
 import type { Election } from "./ElectionTypes";
@@ -11,8 +11,18 @@ const BASE_URL = import.meta.env.VITE_API_URL;
 
 test.each([
 	["Empty", []],
-	["Single", [{ id: 1, topic: "Topics" }]],
-	["Multiple", [{ id: 1, topic: "Topics" }, { id: 2, topic: "Federal Elections 2024" }]]
+	["Single", [{ id: 1, topic: "Topics", description: "" }]],
+	[
+		"Multiple",
+		[
+			{ id: 1, topic: "Topics", description: "" },
+			{
+				id: 2,
+				topic: "Federal Elections 2024",
+				description: "Vote for the lesser evil"
+			}
+		]
+	]
 ])("Get All - %s", async (_, elections: Array<Election>) => {
 	global.fetch = vi.fn(() =>
 		Promise.resolve({
@@ -29,7 +39,7 @@ test.each([
 });
 
 test("Get", async () => {
-	const election: Election = { id: 1, topic: "Topics" };
+	const election: Election = { id: 1, topic: "Topics", description: "" };
 
 	global.fetch = vi.fn(() =>
 		Promise.resolve({
@@ -45,7 +55,7 @@ test("Get", async () => {
 });
 
 test("Create", async () => {
-	const election: Election = { id: 1, topic: "Topics" };
+	const election: Election = { id: 1, topic: "Topics", description: "" };
 
 	global.fetch = vi.fn(() =>
 		Promise.resolve({
@@ -53,24 +63,23 @@ test("Create", async () => {
 		})
 	);
 
-	const response = await ElectionClient.create(election.topic);
+	const response = await ElectionClient.create({
+		topic: election.topic,
+		description: election.description
+	});
 
-	expect(fetch).toHaveBeenCalledWith(
-		`${BASE_URL}/elections`,
-		{
-			method: "POST",
-			headers: {
-				"Content-Type": "application/json"
-			},
-			body: JSON.stringify({ topic: election.topic })
-		}
-	);
+	expect(fetch).toHaveBeenCalledWith(`${BASE_URL}/elections`, {
+		method: "POST",
+		headers: {
+			"Content-Type": "application/json"
+		},
+		body: JSON.stringify({ topic: election.topic })
+	});
 
 	expect(response).toEqual(election);
 });
 
 test("Delete", async () => {
-
 	global.fetch = vi.fn(() =>
 		Promise.resolve({
 			json: () => Promise.resolve(undefined)
@@ -79,10 +88,7 @@ test("Delete", async () => {
 
 	await ElectionClient.delete(1);
 
-	expect(fetch).toHaveBeenCalledWith(
-		`${BASE_URL}/elections/1`,
-		{
-			method: "DELETE"
-		}
-	);
+	expect(fetch).toHaveBeenCalledWith(`${BASE_URL}/elections/1`, {
+		method: "DELETE"
+	});
 });
