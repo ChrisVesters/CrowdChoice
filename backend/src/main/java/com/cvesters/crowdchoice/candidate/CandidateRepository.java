@@ -11,8 +11,6 @@ public interface CandidateRepository extends Repository<CandidateDao, Long> {
 
 	List<CandidateDao> findByElectionId(final long electionId);
 
-	boolean existsByElectionIdAndName(final long electionId, final String name);
-
 	boolean existsByElectionIdAndId(long electionId, long candidateId);
 
 	Optional<CandidateDao> findByElectionIdAndId(final long electionId,

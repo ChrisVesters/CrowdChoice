@@ -13,8 +13,7 @@ CREATE TABLE candidates(
 	description TEXT NOT NULL,
 
 	PRIMARY KEY(id),
-	FOREIGN KEY(election_id) REFERENCES elections(id) ON DELETE CASCADE,
-	UNIQUE(election_id, name)
+	FOREIGN KEY(election_id) REFERENCES elections(id) ON DELETE CASCADE
 );
 
 CREATE TABLE votes(
