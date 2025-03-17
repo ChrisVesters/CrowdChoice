@@ -23,14 +23,16 @@
 	</thead>
 
 	<tbody>
-		{#each props.voteCounts as voteCount}
+		{#each props.candidates as candidate}
 			<tr>
 				<td>
-					{props.candidates.find(
-						candidate => candidate.id == voteCount.candidateId
-					)?.name}
+					{candidate.name}
 				</td>
-				<td> {voteCount.voteCount} </td>
+				<td>
+					{props.voteCounts.find(
+						voteCount => voteCount.candidateId == candidate.id
+					)?.voteCount ?? 0}
+				</td>
 			</tr>
 		{/each}
 	</tbody>
