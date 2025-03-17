@@ -10,8 +10,6 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.CsvSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
@@ -44,22 +42,6 @@ class CandidateRepositoryTest {
 				.anySatisfy(TestCandidate.MICRONAUT::assertEquals)
 				.anySatisfy(TestCandidate.DOCKER::assertEquals)
 				.anySatisfy(TestCandidate.LOMBOK::assertEquals);
-	}
-
-	@Test
-	void existsByElectionIdAndName() {
-		final var candidate = TestCandidate.TRUMP;
-		assertThat(candidateRepository.existsByElectionIdAndName(
-				candidate.election().id(), candidate.name())).isTrue();
-	}
-
-	@ParameterizedTest
-	@CsvSource({ "1,Trump", "2,Harris", "3,Micronaut" })
-	void existsByElectionIdAndNameNotFound(final long electionId,
-			final String name) {
-		assertThat(
-				candidateRepository.existsByElectionIdAndName(electionId, name))
-						.isFalse();
 	}
 
 	@Test

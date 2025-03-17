@@ -9,7 +9,6 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.Collections;
@@ -23,7 +22,6 @@ import com.cvesters.crowdchoice.candidate.bdo.Candidate;
 import com.cvesters.crowdchoice.candidate.dao.CandidateDao;
 import com.cvesters.crowdchoice.election.ElectionService;
 import com.cvesters.crowdchoice.election.TestElection;
-import com.cvesters.crowdchoice.exceptions.ConflictException;
 import com.cvesters.crowdchoice.exceptions.NotFoundException;
 
 class CandidateServiceTest {
@@ -118,23 +116,6 @@ class CandidateServiceTest {
 					request);
 
 			CANDIDATE.assertEquals(created);
-		}
-
-		@Test
-		void candidateAlreadyExists() {
-			final var request = new Candidate(CANDIDATE.name(),
-					CANDIDATE.description());
-
-			when(candidateRepository.existsByElectionIdAndName(ELECTION_ID,
-					CANDIDATE.name())).thenReturn(true);
-
-			assertThatThrownBy(
-					() -> candidateService.create(ELECTION_ID, request))
-							.isInstanceOf(ConflictException.class);
-
-			verify(candidateRepository).existsByElectionIdAndName(ELECTION_ID,
-					CANDIDATE.name());
-			verifyNoMoreInteractions(candidateRepository);
 		}
 
 		@Test

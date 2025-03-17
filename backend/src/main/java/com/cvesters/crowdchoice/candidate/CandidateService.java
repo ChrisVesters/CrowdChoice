@@ -8,7 +8,6 @@ import org.springframework.stereotype.Service;
 import com.cvesters.crowdchoice.candidate.bdo.Candidate;
 import com.cvesters.crowdchoice.candidate.dao.CandidateDao;
 import com.cvesters.crowdchoice.election.ElectionService;
-import com.cvesters.crowdchoice.exceptions.ConflictException;
 import com.cvesters.crowdchoice.exceptions.NotFoundException;
 
 @Service
@@ -36,11 +35,6 @@ public class CandidateService {
 	public Candidate create(final long electionId, final Candidate candidate) {
 		Objects.requireNonNull(candidate);
 		electionService.verifyExists(electionId);
-
-		if (candidateRepository.existsByElectionIdAndName(electionId,
-				candidate.getName())) {
-			throw new ConflictException();
-		}
 
 		final CandidateDao dao = new CandidateDao(electionId);
 		CandidateMapper.updateDao(candidate, dao);
