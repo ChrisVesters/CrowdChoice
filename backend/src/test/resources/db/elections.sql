@@ -1,8 +1,8 @@
-INSERT INTO elections(id, topic, description)
+INSERT INTO elections(id, topic, description, started_on, ended_on)
 OVERRIDING SYSTEM VALUE
 VALUES 
-	(1, 'Topics', ''),
-	(2, 'Federal Elections 2024', 'Choose a new president.');
+	(1, 'Topics', '', null, null),
+	(2, 'Federal Elections 2024', 'Choose a new president.', '2023-10-01 08:00:00 +00:00', '2023-10-01 18:00:00 +00:00');
 
 SELECT setval('elections_id_seq', (SELECT MAX(id) from "elections"));
 

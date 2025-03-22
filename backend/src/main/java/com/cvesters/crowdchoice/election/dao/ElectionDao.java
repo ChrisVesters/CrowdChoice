@@ -1,5 +1,8 @@
 package com.cvesters.crowdchoice.election.dao;
 
+import java.time.ZonedDateTime;
+
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -24,4 +27,10 @@ public class ElectionDao {
 	private String topic;
 
 	private String description;
+
+	@Column(name = "started_on")
+	private ZonedDateTime startedOn;
+
+	@Column(name = "ended_on")
+	private ZonedDateTime endedOn;
 }

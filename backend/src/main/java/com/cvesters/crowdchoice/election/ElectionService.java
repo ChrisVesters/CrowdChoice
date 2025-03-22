@@ -40,7 +40,7 @@ public class ElectionService {
 	public ElectionInfo create(final ElectionInfo election) {
 		Objects.requireNonNull(election);
 
-		final ElectionDao dao = new ElectionDao();
+		final var dao = new ElectionDao();
 		ElectionMapper.updateDao(election, dao);
 		final ElectionDao created = electionRepository.save(dao);
 		return ElectionMapper.fromDao(created);

@@ -38,7 +38,6 @@ class ElectionRepositoryTest {
 		assertThat(elections).hasSize(2)
 				.anySatisfy(TestElection.TOPICS::assertEquals)
 				.anySatisfy(TestElection.FEDERAL_ELECTIONS_2024::assertEquals);
-
 	}
 
 	@Test
@@ -48,7 +47,6 @@ class ElectionRepositoryTest {
 				.findById(election.id());
 
 		assertThat(found).hasValueSatisfying(election::assertEquals);
-
 	}
 
 	@Test

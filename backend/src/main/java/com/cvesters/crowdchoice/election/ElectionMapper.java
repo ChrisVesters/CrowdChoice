@@ -23,7 +23,7 @@ public final class ElectionMapper {
 		Objects.requireNonNull(dao);
 
 		return new ElectionInfo(dao.getId(), dao.getTopic(),
-				dao.getDescription());
+				dao.getDescription(), dao.getStartedOn(), dao.getEndedOn());
 	}
 
 	public static void updateDao(final ElectionInfo election,
@@ -33,12 +33,14 @@ public final class ElectionMapper {
 
 		dao.setTopic(election.getTopic());
 		dao.setDescription(election.getDescription());
+		dao.setStartedOn(election.getStartedOn());
+		dao.setEndedOn(election.getEndedOn());
 	}
 
 	public static ElectionInfo fromDto(final ElectionCreateDto dto) {
 		Objects.requireNonNull(dto);
 
-		return new ElectionInfo(dto.topic(), dto.description());
+		return new ElectionInfo(dto.topic(), dto.description(), null, null);
 	}
 
 	public static List<ElectionInfoDto> toDto(
