@@ -12,12 +12,17 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.time.OffsetDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.http.MediaType;
@@ -53,9 +58,10 @@ class ElectionControllerTest {
 					.andExpect(content().json("[]"));
 		}
 
-		@Test
-		void single() throws Exception {
-			final List<TestElection> elections = List.of(TestElection.TOPICS);
+		@ParameterizedTest
+		@MethodSource("com.cvesters.crowdchoice.election.TestElection#elections")
+		void single(final TestElection election) throws Exception {
+			final List<TestElection> elections = List.of(election);
 
 			final List<ElectionInfo> infos = elections.stream()
 					.map(TestElection::info)
@@ -63,7 +69,7 @@ class ElectionControllerTest {
 			when(electionService.findAll()).thenReturn(infos);
 
 			final String expectedBody = elections.stream()
-					.map(TestElection::infoJson)
+					.map(foundElection -> infoJson(foundElection))
 					.collect(Collectors.joining(",", "[", "]"));
 
 			final RequestBuilder request = get(BASE_URL);
@@ -84,7 +90,7 @@ class ElectionControllerTest {
 			when(electionService.findAll()).thenReturn(infos);
 
 			final String expectedBody = elections.stream()
-					.map(TestElection::infoJson)
+					.map(election -> infoJson(election))
 					.collect(Collectors.joining(",", "[", "]"));
 
 			final RequestBuilder request = get(BASE_URL);
@@ -98,27 +104,28 @@ class ElectionControllerTest {
 	@Nested
 	class Get {
 
-		private static final TestElection ELECTION = TestElection.TOPICS;
-		private static final String ENDPOINT = BASE_URL + "/" + ELECTION.id();
-
-		@Test
-		void success() throws Exception {
-			when(electionService.get(ELECTION.id()))
-					.thenReturn(ELECTION.info());
-
-			final RequestBuilder request = get(ENDPOINT);
+		@ParameterizedTest
+		@MethodSource("com.cvesters.crowdchoice.election.TestElection#elections")
+		void success(final TestElection election) throws Exception {
+			when(electionService.get(election.id()))
+			.thenReturn(election.info());
+			
+			final String endpoint = BASE_URL + "/" + election.id();
+			final RequestBuilder request = get(endpoint);
 
 			mockMvc.perform(request)
 					.andExpect(status().isOk())
-					.andExpect(content().json(ELECTION.infoJson()));
+					.andExpect(content().json(infoJson(election)));
 		}
 
 		@Test
 		void notFound() throws Exception {
-			when(electionService.get(ELECTION.id()))
+			final long electionId = 125L;
+			when(electionService.get(electionId))
 					.thenThrow(new NotFoundException());
 
-			final RequestBuilder request = get(ENDPOINT);
+			final String endpoint = BASE_URL + "/" + electionId;
+			final RequestBuilder request = get(endpoint);
 
 			mockMvc.perform(request).andExpect(status().isNotFound());
 		}
@@ -127,11 +134,12 @@ class ElectionControllerTest {
 	@Nested
 	class Create {
 
-		@Test
-		void success() throws Exception {
-			final TestElection election = TestElection.TOPICS;
+		@ParameterizedTest
+		@MethodSource("com.cvesters.crowdchoice.election.TestElection#elections")
+		void success(final TestElection election) throws Exception {
 			final String requestBody = requestJson(election.topic(),
-					election.description());
+					election.description(), election.startedOn(),
+					election.endedOn());
 
 			when(electionService.create(argThat(request -> {
 				assertThat(request.getId()).isNull();
@@ -147,7 +155,7 @@ class ElectionControllerTest {
 
 			mockMvc.perform(request)
 					.andExpect(status().isCreated())
-					.andExpect(content().json(election.infoJson()));
+					.andExpect(content().json(infoJson(election)));
 		}
 
 		@Test
@@ -160,7 +168,7 @@ class ElectionControllerTest {
 
 		@Test
 		void invalid() throws Exception {
-			final String requestBody = requestJson("", "");
+			final String requestBody = requestJson("", "", null, null);
 
 			final RequestBuilder request = post(BASE_URL)
 					.contentType(MediaType.APPLICATION_JSON_VALUE)
@@ -173,7 +181,8 @@ class ElectionControllerTest {
 		void error() throws Exception {
 			final TestElection election = TestElection.TOPICS;
 			final String requestBody = requestJson(election.topic(),
-					election.description());
+					election.description(), election.startedOn(),
+					election.endedOn());
 
 			when(electionService.create(any()))
 					.thenThrow(RuntimeException.class);
@@ -185,14 +194,17 @@ class ElectionControllerTest {
 			mockMvc.perform(request).andExpect(status().is5xxServerError());
 		}
 
-		private String requestJson(final String topic,
-				final String description) {
+		private String requestJson(final String topic, final String description,
+				final OffsetDateTime startedOn, OffsetDateTime endedOn) {
 			return """
 					{
 						"topic": "%s",
-						"description": "%s"
+						"description": "%s",
+						"startedOn": %s,
+						"endedOn": %s
 					}
-					""".formatted(topic, description);
+					""".formatted(topic, description, map(startedOn),
+					map(endedOn));
 		}
 	}
 
@@ -224,4 +236,26 @@ class ElectionControllerTest {
 			mockMvc.perform(request).andExpect(status().isNotFound());
 		}
 	}
+
+	private String infoJson(final TestElection election) {
+		return """
+				{
+					"id": %d,
+					"topic": "%s",
+					"description": "%s",
+					"startedOn": %s,
+					"endedOn": %s
+				}
+				""".formatted(election.id(), election.topic(),
+				election.description(), map(election.startedOn()),
+				map(election.endedOn()));
+	}
+
+	private String map(final OffsetDateTime timestamp) {
+		return Optional.ofNullable(timestamp)
+				.map(DateTimeFormatter.ISO_DATE_TIME::format)
+				.map(value -> "\"" + value + "\"")
+				.orElse(null);
+	}
+
 }

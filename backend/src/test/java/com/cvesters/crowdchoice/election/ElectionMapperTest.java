@@ -9,6 +9,8 @@ import java.util.List;
 
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import com.cvesters.crowdchoice.election.bdo.ElectionInfo;
 import com.cvesters.crowdchoice.election.dao.ElectionDao;
@@ -20,9 +22,9 @@ class ElectionMapperTest {
 	@Nested
 	class FromDao {
 
-		@Test
-		void single() {
-			final TestElection election = TestElection.TOPICS;
+		@ParameterizedTest
+		@MethodSource("com.cvesters.crowdchoice.election.TestElection#elections")
+		void single(final TestElection election) {
 			final ElectionDao dao = election.dao();
 
 			final ElectionInfo info = ElectionMapper.fromDao(dao);
@@ -32,8 +34,7 @@ class ElectionMapperTest {
 
 		@Test
 		void multiple() {
-			final List<TestElection> elections = List.of(TestElection.TOPICS,
-					TestElection.FEDERAL_ELECTIONS_2024);
+			final List<TestElection> elections = TestElection.ALL;
 
 			final List<ElectionDao> dao = elections.stream()
 					.map(TestElection::dao)
@@ -68,9 +69,9 @@ class ElectionMapperTest {
 	@Nested
 	class UpdateDao {
 
-		@Test
-		void newDao() {
-			final TestElection election = TestElection.TOPICS;
+		@ParameterizedTest
+		@MethodSource("com.cvesters.crowdchoice.election.TestElection#elections")
+		void newDao(final TestElection election) {
 			final ElectionInfo bdo = election.info();
 			final ElectionDao dao = new ElectionDao();
 
@@ -79,11 +80,13 @@ class ElectionMapperTest {
 			assertThat(dao.getId()).isNull();
 			assertThat(dao.getTopic()).isEqualTo(election.topic());
 			assertThat(dao.getDescription()).isEqualTo(election.description());
+			assertThat(dao.getStartedOn()).isEqualTo(election.startedOn());
+			assertThat(dao.getEndedOn()).isEqualTo(election.endedOn());
 		}
 
-		@Test
-		void existingDao() {
-			final TestElection election = TestElection.TOPICS;
+		@ParameterizedTest
+		@MethodSource("com.cvesters.crowdchoice.election.TestElection#elections")
+		void existingDao(final TestElection election) {
 			final ElectionInfo bdo = election.info();
 			final ElectionDao dao = election.dao();
 
@@ -91,6 +94,8 @@ class ElectionMapperTest {
 
 			verify(dao).setTopic(election.topic());
 			verify(dao).setDescription(election.description());
+			verify(dao).setStartedOn(election.startedOn());
+			verify(dao).setEndedOn(election.endedOn());
 			verifyNoMoreInteractions(dao);
 		}
 
@@ -115,17 +120,20 @@ class ElectionMapperTest {
 	@Nested
 	class FromDto {
 
-		@Test
-		void success() {
-			final TestElection election = TestElection.TOPICS;
+		@ParameterizedTest
+		@MethodSource("com.cvesters.crowdchoice.election.TestElection#elections")
+		void success(final TestElection election) {
 			final var dto = new ElectionCreateDto(election.topic(),
-					election.description());
+					election.description(), election.startedOn(),
+					election.endedOn());
 
 			final ElectionInfo info = ElectionMapper.fromDto(dto);
 
 			assertThat(info.getId()).isNull();
 			assertThat(info.getTopic()).isEqualTo(election.topic());
 			assertThat(info.getDescription()).isEqualTo(election.description());
+			assertThat(info.getStartedOn()).isEqualTo(election.startedOn());
+			assertThat(info.getEndedOn()).isEqualTo(election.endedOn());
 		}
 
 		@Test
@@ -138,9 +146,9 @@ class ElectionMapperTest {
 	@Nested
 	class ToDto {
 
-		@Test
-		void single() {
-			final TestElection election = TestElection.TOPICS;
+		@ParameterizedTest
+		@MethodSource("com.cvesters.crowdchoice.election.TestElection#elections")
+		void single(final TestElection election) {
 			final ElectionInfo info = election.info();
 
 			final ElectionInfoDto dto = ElectionMapper.toDto(info);
@@ -150,8 +158,7 @@ class ElectionMapperTest {
 
 		@Test
 		void multiple() {
-			final List<TestElection> elections = List.of(TestElection.TOPICS,
-					TestElection.FEDERAL_ELECTIONS_2024);
+			final List<TestElection> elections = TestElection.ALL;
 
 			final List<ElectionInfo> infos = elections.stream()
 					.map(TestElection::info)

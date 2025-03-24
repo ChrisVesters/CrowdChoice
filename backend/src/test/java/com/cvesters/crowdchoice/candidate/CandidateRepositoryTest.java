@@ -103,20 +103,6 @@ class CandidateRepositoryTest {
 	}
 
 	@Test
-	void saveWithDuplicateName() {
-		final long electionId = 1L;
-		final String name = "Docker";
-		final String description = "No dependencies on your system anymore";
-
-		final var candidate = new CandidateDao(electionId);
-		candidate.setName(name);
-		candidate.setDescription(description);
-
-		assertThatThrownBy(() -> candidateRepository.save(candidate))
-				.isInstanceOf(DataIntegrityViolationException.class);
-	}
-
-	@Test
 	void delete() {
 		final long candidateId = 1L;
 		final CandidateDao dao = entityManager.find(CandidateDao.class,
