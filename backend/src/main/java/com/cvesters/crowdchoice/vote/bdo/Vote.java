@@ -1,6 +1,6 @@
 package com.cvesters.crowdchoice.vote.bdo;
 
-import java.time.ZonedDateTime;
+import java.time.OffsetDateTime;
 import java.util.Objects;
 
 import lombok.Getter;
@@ -9,21 +9,23 @@ import lombok.Getter;
 public class Vote {
 
 	private Long id;
-	private ZonedDateTime castedOn;
+	private OffsetDateTime castedOn;
 	private long candidateId;
-	
-	private Vote(final Long id, final ZonedDateTime castedOn, final long candidateId) {
+
+	private Vote(final Long id, final OffsetDateTime castedOn,
+			final long candidateId) {
 		Objects.requireNonNull(castedOn);
 		this.id = id;
 		this.castedOn = castedOn;
 		this.candidateId = candidateId;
 	}
 
-	public Vote(final long id, final ZonedDateTime castedOn, final long candidateId) {
+	public Vote(final long id, final OffsetDateTime castedOn,
+			final long candidateId) {
 		this(Long.valueOf(id), castedOn, candidateId);
 	}
 
 	public Vote(final long candidateId) {
-		this(null, ZonedDateTime.now(), candidateId);
+		this(null, OffsetDateTime.now(), candidateId);
 	}
 }

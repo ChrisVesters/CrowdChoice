@@ -7,7 +7,7 @@ import static org.assertj.core.api.Assertions.within;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import java.time.ZonedDateTime;
+import java.time.OffsetDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 
@@ -52,7 +52,7 @@ class VoteMapperTest {
 			final Vote result = VoteMapper.fromDto(dto);
 
 			assertThat(result.getId()).isNull();
-			assertThat(result.getCastedOn()).isCloseTo(ZonedDateTime.now(),
+			assertThat(result.getCastedOn()).isCloseTo(OffsetDateTime.now(),
 					within(500, ChronoUnit.MILLIS));
 			assertThat(result.getCandidateId())
 					.isEqualTo(VOTE.candidate().id());

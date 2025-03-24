@@ -8,7 +8,7 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import java.time.ZonedDateTime;
+import java.time.OffsetDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.Collections;
 import java.util.List;
@@ -88,7 +88,7 @@ class VoteServiceTest {
 
 			when(voteRepository.save(argThat(saved -> {
 				assertThat(saved.getId()).isNull();
-				assertThat(saved.getCastedOn()).isCloseTo(ZonedDateTime.now(),
+				assertThat(saved.getCastedOn()).isCloseTo(OffsetDateTime.now(),
 						within(500, ChronoUnit.MILLIS));
 				assertThat(saved.getCandidateId()).isEqualTo(CANDIDATE_ID);
 				return true;

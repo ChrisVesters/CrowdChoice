@@ -1,6 +1,6 @@
 package com.cvesters.crowdchoice.vote.dao;
 
-import java.time.ZonedDateTime;
+import java.time.OffsetDateTime;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -26,13 +26,13 @@ public class VoteDao {
 
 	@Column(name = "casted_on", nullable = false, updatable = false)
 	@Setter(value = AccessLevel.PRIVATE)
-	private ZonedDateTime castedOn;
+	private OffsetDateTime castedOn;
 
 	@Column(name = "candidate_id", nullable = false, updatable = false)
 	@Setter(value = AccessLevel.PRIVATE)
 	private long candidateId;
 
-	public VoteDao(final ZonedDateTime castedOn, final long candidateId) {
+	public VoteDao(final OffsetDateTime castedOn, final long candidateId) {
 		this.castedOn = castedOn;
 		this.candidateId = candidateId;
 	}
