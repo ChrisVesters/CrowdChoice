@@ -5,8 +5,8 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.withSettings;
 
+import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
-import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 
 import org.mockito.quality.Strictness;
@@ -16,11 +16,11 @@ import com.cvesters.crowdchoice.vote.bdo.Vote;
 import com.cvesters.crowdchoice.vote.dao.VoteDao;
 import com.cvesters.crowdchoice.vote.dto.VoteDto;
 
-public record TestVote(long id, ZonedDateTime castedOn,
+public record TestVote(long id, OffsetDateTime castedOn,
 		TestCandidate candidate) {
 
 	public static final TestVote TRUMP = new TestVote(1L,
-			ZonedDateTime.of(2024, 12, 1, 8, 30, 0, 0, ZoneOffset.UTC),
+			OffsetDateTime.of(2024, 12, 1, 8, 30, 0, 0, ZoneOffset.UTC),
 			TestCandidate.TRUMP);
 
 	public Vote bdo() {

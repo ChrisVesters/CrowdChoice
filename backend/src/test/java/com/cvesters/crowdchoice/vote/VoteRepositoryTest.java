@@ -3,7 +3,7 @@ package com.cvesters.crowdchoice.vote;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-import java.time.ZonedDateTime;
+import java.time.OffsetDateTime;
 import java.util.List;
 
 import jakarta.persistence.EntityManager;
@@ -74,7 +74,7 @@ class VoteRepositoryTest {
 	class Save {
 
 		private static final long CANDIDATE_ID = 5L;
-		private static final ZonedDateTime CASTED_ON = ZonedDateTime.now();
+		private static final OffsetDateTime CASTED_ON = OffsetDateTime.now();
 
 		@Test
 		void success() {
