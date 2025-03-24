@@ -1,5 +1,6 @@
 package com.cvesters.crowdchoice.election;
 
+import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Objects;
 
@@ -23,7 +24,7 @@ public final class ElectionMapper {
 		Objects.requireNonNull(dao);
 
 		return new ElectionInfo(dao.getId(), dao.getTopic(),
-				dao.getDescription());
+				dao.getDescription(), dao.getStartedOn(), dao.getEndedOn());
 	}
 
 	public static void updateDao(final ElectionInfo election,
@@ -33,12 +34,15 @@ public final class ElectionMapper {
 
 		dao.setTopic(election.getTopic());
 		dao.setDescription(election.getDescription());
+		dao.setStartedOn(election.getStartedOn());
+		dao.setEndedOn(election.getEndedOn());
 	}
 
 	public static ElectionInfo fromDto(final ElectionCreateDto dto) {
 		Objects.requireNonNull(dto);
 
-		return new ElectionInfo(dto.topic(), dto.description());
+		return new ElectionInfo(dto.topic(), dto.description(), dto.startedOn(),
+				dto.endedOn());
 	}
 
 	public static List<ElectionInfoDto> toDto(
@@ -54,7 +58,9 @@ public final class ElectionMapper {
 		final long id = election.getId();
 		final String topic = election.getTopic();
 		final String description = election.getDescription();
+		final OffsetDateTime startedOn = election.getStartedOn();
+		final OffsetDateTime endedOn = election.getEndedOn();
 
-		return new ElectionInfoDto(id, topic, description);
+		return new ElectionInfoDto(id, topic, description, startedOn, endedOn);
 	}
 }

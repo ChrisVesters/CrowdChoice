@@ -15,6 +15,8 @@ import java.util.stream.IntStream;
 
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import com.cvesters.crowdchoice.election.bdo.ElectionInfo;
 import com.cvesters.crowdchoice.election.dao.ElectionDao;
@@ -39,9 +41,9 @@ class ElectionServiceTest {
 			assertThat(found).isEmpty();
 		}
 
-		@Test
-		void single() {
-			final var election = TestElection.TOPICS;
+		@ParameterizedTest
+		@MethodSource("com.cvesters.crowdchoice.election.TestElection#elections")
+		void single(final TestElection election) {
 			final List<ElectionDao> daos = List.of(election.dao());
 
 			when(electionRepository.findAll()).thenReturn(daos);
@@ -53,8 +55,7 @@ class ElectionServiceTest {
 
 		@Test
 		void multiple() {
-			final var elections = List.of(TestElection.TOPICS,
-					TestElection.FEDERAL_ELECTIONS_2024);
+			final var elections = TestElection.ALL;
 			final List<ElectionDao> daos = elections.stream()
 					.map(TestElection::dao)
 					.toList();
@@ -72,9 +73,9 @@ class ElectionServiceTest {
 	@Nested
 	class Get {
 
-		@Test
-		void success() {
-			final TestElection election = TestElection.TOPICS;
+		@ParameterizedTest
+		@MethodSource("com.cvesters.crowdchoice.election.TestElection#elections")
+		void success(final TestElection election) {
 			final ElectionDao dao = election.dao();
 
 			when(electionRepository.findById(1L)).thenReturn(Optional.of(dao));
@@ -97,8 +98,7 @@ class ElectionServiceTest {
 	@Nested
 	class VerifyExists {
 
-		private static final TestElection ELECTION = TestElection.TOPICS;
-		private static final long ELECTION_ID = ELECTION.id();
+		private static final long ELECTION_ID = 12L;
 
 		@Test
 		void exists() {
@@ -120,16 +120,21 @@ class ElectionServiceTest {
 	@Nested
 	class Create {
 
-		@Test
-		void create() {
-			final var election = TestElection.TOPICS;
+		@ParameterizedTest
+		@MethodSource("com.cvesters.crowdchoice.election.TestElection#elections")
+		void create(final TestElection election) {
 			final var request = new ElectionInfo(election.topic(),
-					election.description());
+					election.description(), election.startedOn(),
+					election.endedOn());
 			final ElectionDao expectedDao = election.dao();
 
 			when(electionRepository.save(argThat(dao -> {
 				assertThat(dao.getId()).isNull();
 				assertThat(dao.getTopic()).isEqualTo(election.topic());
+				assertThat(dao.getDescription())
+						.isEqualTo(election.description());
+				assertThat(dao.getStartedOn()).isEqualTo(election.startedOn());
+				assertThat(dao.getEndedOn()).isEqualTo(election.endedOn());
 				return true;
 			}))).thenReturn(expectedDao);
 
@@ -148,27 +153,25 @@ class ElectionServiceTest {
 	@Nested
 	class Delete {
 
-		private static final TestElection ELECTION = TestElection.TOPICS;
-		private static final long ELECTION_ID = ELECTION.id();
-
-		@Test
-		void success() {
-
-			final ElectionDao dao = ELECTION.dao();
-			when(electionRepository.findById(ELECTION_ID))
+		@ParameterizedTest
+		@MethodSource("com.cvesters.crowdchoice.election.TestElection#elections")
+		void success(final TestElection election) {
+			final ElectionDao dao = election.dao();
+			when(electionRepository.findById(election.id()))
 					.thenReturn(Optional.of(dao));
 
-			electionService.delete(ELECTION_ID);
+			electionService.delete(election.id());
 
 			verify(electionRepository).delete(dao);
 		}
 
 		@Test
 		void electionNotFound() {
-			when(electionRepository.findById(ELECTION_ID))
+			final long electionId = 123L;
+			when(electionRepository.findById(electionId))
 					.thenReturn(Optional.empty());
 
-			assertThatThrownBy(() -> electionService.delete(ELECTION_ID))
+			assertThatThrownBy(() -> electionService.delete(electionId))
 					.isInstanceOf(NotFoundException.class);
 		}
 	}
