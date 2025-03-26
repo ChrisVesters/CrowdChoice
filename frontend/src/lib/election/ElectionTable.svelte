@@ -49,6 +49,18 @@
 			props.onAdd(election.id)
 		);
 	}
+
+	function getStatus(election: Election): string {
+		if (election.startedOn == null) {
+			return $t("common.draft");
+		} else if (new Date(election.startedOn) > new Date()) {
+			return $t("common.scheduled");
+		} else if (election.endedOn == null || new Date(election.endedOn) > new Date()) {
+			return $t("common.inProgress")
+		} else {
+			return $t("common.finished");
+		}
+	}
 </script>
 
 <button onclick={handleRemoveElections} disabled={selected.length == 0}>
@@ -73,6 +85,7 @@
 			</th>
 			<th>{$t("common.topic")}</th>
 			<th>{$t("common.description")}</th>
+			<th>{$t("common.status")}</th>
 		</tr>
 	</thead>
 
@@ -92,6 +105,7 @@
 					<a href="/elections/{election.id}">{election.topic}</a>
 				</td>
 				<td>{election.description}</td>
+				<td>{getStatus(election)}</td>
 			</tr>
 		{/each}
 	</tbody>

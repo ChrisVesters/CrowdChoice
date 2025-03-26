@@ -15,6 +15,12 @@
 </script>
 
 <h1>{@html data.info.topic}</h1>
+<div>
+	{@html data.info.startedOn
+		? new Date(data.info.startedOn).toLocaleString()
+		: ""} - {@html data.info.endedOn ? new Date(data.info.endedOn).toLocaleString() : ""}
+</div>
+<h2>{@html data.info.description}</h2>
 
 <div class="tab">
 	<button

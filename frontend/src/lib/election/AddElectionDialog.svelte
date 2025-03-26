@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { t } from "$lib/translations/index";
-	
+
 	import type { CreateElectionRequest } from "./ElectionTypes";
 
 	export type AddElectionDialogProps = {
@@ -12,6 +12,8 @@
 
 	let topicField: HTMLInputElement;
 	let descriptionField: HTMLTextAreaElement;
+	let startsOnField: HTMLInputElement;
+	let endsOnField: HTMLInputElement;
 
 	function onload(elemnt: HTMLDialogElement): void {
 		elemnt.showModal();
@@ -20,6 +22,10 @@
 	function addElection(): void {
 		const topic = topicField.value.trim();
 		const description = descriptionField.value.trim();
+		const startsOn = startsOnField.value;
+		const endsOn = endsOnField.value;
+
+		console.log(startsOn, endsOn);
 
 		if (topic.length == 0) {
 			// TODO: set error class
@@ -29,7 +35,9 @@
 
 		props.onAdd({
 			topic,
-			description
+			description,
+			startedOn: new Date(startsOn).toISOString(),
+			endedOn: new Date(endsOn).toISOString()
 		});
 	}
 </script>
@@ -55,6 +63,23 @@
 			name="description"
 			rows="3"
 		></textarea>
+		<label for="startsOn">{$t("common.startsOn")}</label>
+		<input
+			bind:this={startsOnField}
+			class="fullWidth"
+			type="datetime-local"
+			id="startsOn"
+			name="startsOn"
+		/>
+
+		<label for="endsOn">{$t("common.endsOn")}</label>
+		<input
+			bind:this={endsOnField}
+			class="fullWidth"
+			type="datetime-local"
+			id="endsOn"
+			name="endsOn"
+		/>
 	</form>
 
 	<div style:float="right">
