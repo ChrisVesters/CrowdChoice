@@ -1,4 +1,8 @@
-import type { CreateElectionRequest, Election } from "./ElectionTypes";
+import type {
+	CreateElectionRequest,
+	Election,
+	UpdateElectionRequest
+} from "./ElectionTypes";
 
 export class ElectionClient {
 	public static async getAll(): Promise<Array<Election>> {
@@ -9,9 +13,24 @@ export class ElectionClient {
 		return fetch(`${getEndpoint()}/${id}`).then(res => res.json());
 	}
 
-	public static async create(request: CreateElectionRequest): Promise<Election> {
+	public static async create(
+		request: CreateElectionRequest
+	): Promise<Election> {
 		return fetch(getEndpoint(), {
 			method: "POST",
+			headers: {
+				"Content-Type": "application/json"
+			},
+			body: JSON.stringify(request)
+		}).then(res => res.json());
+	}
+
+	public static async update(
+		electionId: number,
+		request: UpdateElectionRequest
+	): Promise<Election> {
+		return fetch(`${getEndpoint()}/${electionId}`, {
+			method: "PUT",
 			headers: {
 				"Content-Type": "application/json"
 			},

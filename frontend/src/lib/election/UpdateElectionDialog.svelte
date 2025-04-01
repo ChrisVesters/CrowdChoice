@@ -1,26 +1,33 @@
 <script lang="ts">
 	import { t } from "$lib/translations/index";
-	import { fromFormInputFormat } from "$util/DateUtils";
 
-	import type { CreateElectionRequest } from "./ElectionTypes";
+	import type { Election, UpdateElectionRequest } from "./ElectionTypes";
 
-	export type AddElectionDialogProps = {
+	import { fromFormInputFormat, toFormInputFormat } from "$util/DateUtils";
+
+	export type UpdateElectionDialogProps = {
+		election: Election;
 		onClose: () => void;
-		onAdd: (request: CreateElectionRequest) => void;
+		onUpdate: (electionId: number, request: UpdateElectionRequest) => void;
 	};
 
-	const props: AddElectionDialogProps = $props();
+	const props: UpdateElectionDialogProps = $props();
 
 	let topicField: HTMLInputElement;
 	let descriptionField: HTMLTextAreaElement;
 	let startsOnField: HTMLInputElement;
 	let endsOnField: HTMLInputElement;
 
-	function onload(elemnt: HTMLDialogElement): void {
-		elemnt.showModal();
+	function onload(element: HTMLDialogElement): void {
+		topicField.value = props.election.topic;
+		descriptionField.value = props.election.description;
+		startsOnField.value = toFormInputFormat(props.election.startedOn);
+		endsOnField.value = toFormInputFormat(props.election.endedOn);
+
+		element.showModal();
 	}
 
-	function addElection(): void {
+	function updateElection(): void {
 		const topic = topicField.value.trim();
 		const description = descriptionField.value.trim();
 		const startsOn = startsOnField.value;
@@ -32,7 +39,7 @@
 			return;
 		}
 
-		props.onAdd({
+		props.onUpdate(props.election.id, {
 			topic,
 			description,
 			startedOn: fromFormInputFormat(startsOn),
@@ -42,7 +49,7 @@
 </script>
 
 <dialog use:onload>
-	<h3>{$t("common.createObject", { object: $t("common.election") })}</h3>
+	<h3>{$t("common.updateObject", { object: $t("common.election") })}</h3>
 
 	<form>
 		<label for="topic">{$t("common.topic")}</label>
@@ -83,6 +90,6 @@
 
 	<div style:float="right">
 		<button onclick={props.onClose}>{$t("common.cancel")}</button>
-		<button onclick={addElection}>{$t("common.create")}</button>
+		<button onclick={updateElection}>{$t("common.update")}</button>
 	</div>
 </dialog>
