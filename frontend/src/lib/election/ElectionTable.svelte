@@ -5,7 +5,12 @@
 
 	import AddElectionDialog from "./AddElectionDialog.svelte";
 	import { ElectionClient } from "./ElectionClient";
-	import type { CreateElectionRequest, Election } from "./ElectionTypes";
+	import type {
+		CreateElectionRequest,
+		Election,
+		UpdateElectionRequest
+	} from "./ElectionTypes";
+	import UpdateElectionDialog from "./UpdateElectionDialog.svelte";
 
 	export type ElectionTableProps = {
 		elections: Array<Election>;
@@ -17,6 +22,7 @@
 
 	let selected: Array<number> = $state([]);
 	let isAddElectionDialogVisible: boolean = $state(false);
+	let isUpdateElectionDialogVisible: boolean = $state(false);
 
 	const toggleAll: ChangeEventHandler<HTMLInputElement> = e => {
 		if (props.elections.length == 0) {
@@ -50,13 +56,32 @@
 		);
 	}
 
+	function showUpdateElectionDialog(): void {
+		isUpdateElectionDialogVisible = true;
+	}
+
+	function hideUpdateElectionDialog(): void {
+		isUpdateElectionDialogVisible = false;
+	}
+
+	function updateElection(
+		electionId: number,
+		request: UpdateElectionRequest
+	): void {
+		hideUpdateElectionDialog();
+		ElectionClient.update(electionId, request).then(props.onChange);
+	}
+
 	function getStatus(election: Election): string {
 		if (election.startedOn == null) {
 			return $t("common.draft");
 		} else if (new Date(election.startedOn) > new Date()) {
 			return $t("common.scheduled");
-		} else if (election.endedOn == null || new Date(election.endedOn) > new Date()) {
-			return $t("common.inProgress")
+		} else if (
+			election.endedOn == null ||
+			new Date(election.endedOn) > new Date()
+		) {
+			return $t("common.inProgress");
 		} else {
 			return $t("common.finished");
 		}
@@ -68,6 +93,9 @@
 </button>
 <button onclick={showAddElectionDialog}>
 	{$t("common.add")}
+</button>
+<button onclick={showUpdateElectionDialog} disabled={selected.length != 1}>
+	{$t("common.edit")}
 </button>
 
 <table>
@@ -113,4 +141,13 @@
 
 {#if isAddElectionDialogVisible === true}
 	<AddElectionDialog onClose={hideAddElectionDialog} onAdd={addElection} />
+{/if}
+
+{#if isUpdateElectionDialogVisible === true}
+	<UpdateElectionDialog
+		onClose={hideUpdateElectionDialog}
+		onUpdate={updateElection}
+		election={props.elections.find(e => e.id === selected[0]) ??
+			props.elections[0]}
+	/>
 {/if}

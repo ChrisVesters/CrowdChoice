@@ -12,3 +12,10 @@ export type CreateElectionRequest = {
 	startedOn: string | null;
 	endedOn: string | null;
 };
+
+export type UpdateElectionRequest = {
+	topic: string;
+	description: string;
+	startedOn: string | null;
+	endedOn: string | null;
+};
