@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatNoException;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -17,6 +18,7 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.mockito.InOrder;
 
 import com.cvesters.crowdchoice.election.bdo.ElectionInfo;
 import com.cvesters.crowdchoice.election.dao.ElectionDao;
@@ -147,6 +149,55 @@ class ElectionServiceTest {
 		void electionNull() {
 			assertThatThrownBy(() -> electionService.create(null))
 					.isInstanceOf(NullPointerException.class);
+		}
+	}
+
+	@Nested
+	class Update {
+
+		@ParameterizedTest
+		@MethodSource("com.cvesters.crowdchoice.election.TestElection#elections")
+		void create(final TestElection election) {
+			final var request = election.info();
+			final ElectionDao expectedDao = election.dao();
+
+			when(electionRepository.findById(election.id()))
+					.thenReturn(Optional.of(expectedDao));
+
+			when(electionRepository.save(expectedDao)).thenReturn(expectedDao);
+
+			final ElectionInfo updated = electionService.update(request);
+
+			election.assertEquals(updated);
+
+			final InOrder inOrder = inOrder(electionRepository, expectedDao);
+			inOrder.verify(electionRepository).findById(election.id());
+			inOrder.verify(expectedDao).setTopic(election.topic());
+			inOrder.verify(expectedDao).setDescription(election.description());
+			inOrder.verify(expectedDao).setStartedOn(election.startedOn());
+			inOrder.verify(expectedDao).setEndedOn(election.endedOn());
+			inOrder.verify(electionRepository).save(expectedDao);
+		}
+
+		@Test
+		void electionNull() {
+			assertThatThrownBy(() -> electionService.update(null))
+					.isInstanceOf(NullPointerException.class);
+		}
+
+		@Test
+		void electionNotFound() {
+			final TestElection election = TestElection.TOPICS;
+			final var request = new ElectionInfo(election.topic(),
+					election.description(), election.startedOn(),
+					election.endedOn());
+
+			final long electionId = 123L;
+			when(electionRepository.findById(electionId))
+					.thenReturn(Optional.empty());
+
+			assertThatThrownBy(() -> electionService.update(request))
+					.isInstanceOf(NotFoundException.class);
 		}
 	}
 

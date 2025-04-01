@@ -9,6 +9,7 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -108,8 +109,8 @@ class ElectionControllerTest {
 		@MethodSource("com.cvesters.crowdchoice.election.TestElection#elections")
 		void success(final TestElection election) throws Exception {
 			when(electionService.get(election.id()))
-			.thenReturn(election.info());
-			
+					.thenReturn(election.info());
+
 			final String endpoint = BASE_URL + "/" + election.id();
 			final RequestBuilder request = get(endpoint);
 
@@ -195,6 +196,103 @@ class ElectionControllerTest {
 		}
 
 		private String requestJson(final String topic, final String description,
+				final OffsetDateTime startedOn, OffsetDateTime endedOn) {
+			return """
+					{
+						"topic": "%s",
+						"description": "%s",
+						"startedOn": %s,
+						"endedOn": %s
+					}
+					""".formatted(topic, description, map(startedOn),
+					map(endedOn));
+		}
+	}
+
+	@Nested
+	class Update {
+
+		@ParameterizedTest
+		@MethodSource("com.cvesters.crowdchoice.election.TestElection#elections")
+		void success(final TestElection election) throws Exception {
+			final String requestBody = updateJson(election.topic(),
+					election.description(), election.startedOn(),
+					election.endedOn());
+
+			when(electionService.update(argThat(request -> {
+				assertThat(request.getId()).isEqualTo(election.id());
+				assertThat(request.getTopic()).isEqualTo(election.topic());
+				assertThat(request.getDescription())
+						.isEqualTo(election.description());
+				return true;
+			}))).thenReturn(election.info());
+
+			final RequestBuilder request = put(BASE_URL + "/" + election.id())
+					.contentType(MediaType.APPLICATION_JSON_VALUE)
+					.content(requestBody);
+
+			mockMvc.perform(request)
+					.andExpect(status().isOk())
+					.andExpect(content().json(infoJson(election)));
+		}
+
+		@Test
+		void withoutBody() throws Exception {
+			final long electionId = 234L;
+			final RequestBuilder request = put(BASE_URL + "/" + electionId)
+					.contentType(MediaType.APPLICATION_JSON_VALUE);
+
+			mockMvc.perform(request).andExpect(status().isBadRequest());
+		}
+
+		@Test
+		void invalid() throws Exception {
+			final String requestBody = updateJson("", "", null, null);
+
+			final long electionId = 234L;
+			final RequestBuilder request = put(BASE_URL + "/" + electionId)
+					.contentType(MediaType.APPLICATION_JSON_VALUE)
+					.content(requestBody);
+
+			mockMvc.perform(request).andExpect(status().isBadRequest());
+		}
+
+		@Test
+		void notFound() throws Exception {
+			final TestElection election = TestElection.TOPICS;
+
+			final String requestBody = updateJson(election.topic(),
+					election.description(), election.startedOn(),
+					election.endedOn());
+
+			doThrow(new NotFoundException()).when(electionService)
+					.update(any());
+
+			final RequestBuilder request = put(BASE_URL + "/" + election.id())
+					.contentType(MediaType.APPLICATION_JSON_VALUE)
+					.content(requestBody);
+
+			mockMvc.perform(request).andExpect(status().isNotFound());
+		}
+
+		@Test
+		void error() throws Exception {
+			final TestElection election = TestElection.TOPICS;
+			final String requestBody = updateJson(election.topic(),
+					election.description(), election.startedOn(),
+					election.endedOn());
+
+			when(electionService.update(any()))
+					.thenThrow(RuntimeException.class);
+
+			final RequestBuilder request = put(BASE_URL + "/" + election.id())
+					.contentType(MediaType.APPLICATION_JSON_VALUE)
+					.content(requestBody);
+
+			mockMvc.perform(request).andExpect(status().is5xxServerError());
+		}
+
+		private String updateJson(final String topic, final String description,
 				final OffsetDateTime startedOn, OffsetDateTime endedOn) {
 			return """
 					{

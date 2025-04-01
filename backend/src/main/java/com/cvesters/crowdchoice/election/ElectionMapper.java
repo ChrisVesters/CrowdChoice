@@ -8,6 +8,7 @@ import com.cvesters.crowdchoice.election.bdo.ElectionInfo;
 import com.cvesters.crowdchoice.election.dao.ElectionDao;
 import com.cvesters.crowdchoice.election.dto.ElectionCreateDto;
 import com.cvesters.crowdchoice.election.dto.ElectionInfoDto;
+import com.cvesters.crowdchoice.election.dto.ElectionUpdateDto;
 
 public final class ElectionMapper {
 
@@ -43,6 +44,14 @@ public final class ElectionMapper {
 
 		return new ElectionInfo(dto.topic(), dto.description(), dto.startedOn(),
 				dto.endedOn());
+	}
+
+	public static ElectionInfo fromDto(final long electionId,
+			final ElectionUpdateDto dto) {
+		Objects.requireNonNull(dto);
+
+		return new ElectionInfo(electionId, dto.topic(), dto.description(),
+				dto.startedOn(), dto.endedOn());
 	}
 
 	public static List<ElectionInfoDto> toDto(
