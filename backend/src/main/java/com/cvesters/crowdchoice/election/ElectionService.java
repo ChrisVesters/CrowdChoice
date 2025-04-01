@@ -46,6 +46,17 @@ public class ElectionService {
 		return ElectionMapper.fromDao(created);
 	}
 
+	public ElectionInfo update(final ElectionInfo election) {
+		Objects.requireNonNull(election);
+
+		final ElectionDao dao = electionRepository.findById(election.getId())
+				.orElseThrow(NotFoundException::new);
+
+		ElectionMapper.updateDao(election, dao);
+		final ElectionDao updated = electionRepository.save(dao);
+		return ElectionMapper.fromDao(updated);
+	}
+
 	public void delete(final long electionId) {
 		final ElectionDao dao = electionRepository.findById(electionId)
 				.orElseThrow(NotFoundException::new);

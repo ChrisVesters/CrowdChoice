@@ -16,6 +16,7 @@ import com.cvesters.crowdchoice.election.bdo.ElectionInfo;
 import com.cvesters.crowdchoice.election.dao.ElectionDao;
 import com.cvesters.crowdchoice.election.dto.ElectionCreateDto;
 import com.cvesters.crowdchoice.election.dto.ElectionInfoDto;
+import com.cvesters.crowdchoice.election.dto.ElectionUpdateDto;
 
 class ElectionMapperTest {
 
@@ -118,7 +119,7 @@ class ElectionMapperTest {
 	}
 
 	@Nested
-	class FromDto {
+	class FromCreateDto {
 
 		@ParameterizedTest
 		@MethodSource("com.cvesters.crowdchoice.election.TestElection#elections")
@@ -138,7 +139,37 @@ class ElectionMapperTest {
 
 		@Test
 		void dtoNull() {
-			assertThatThrownBy(() -> ElectionMapper.fromDto(null))
+			final ElectionCreateDto dto = null;
+			assertThatThrownBy(() -> ElectionMapper.fromDto(dto))
+					.isInstanceOf(NullPointerException.class);
+		}
+	}
+
+	@Nested
+	class FromUpdateDto {
+
+		@ParameterizedTest
+		@MethodSource("com.cvesters.crowdchoice.election.TestElection#elections")
+		void success(final TestElection election) {
+			final var dto = new ElectionUpdateDto(election.topic(),
+					election.description(), election.startedOn(),
+					election.endedOn());
+
+			final ElectionInfo info = ElectionMapper.fromDto(election.id(),
+					dto);
+
+			assertThat(info.getId()).isEqualTo(election.id());
+			assertThat(info.getTopic()).isEqualTo(election.topic());
+			assertThat(info.getDescription()).isEqualTo(election.description());
+			assertThat(info.getStartedOn()).isEqualTo(election.startedOn());
+			assertThat(info.getEndedOn()).isEqualTo(election.endedOn());
+		}
+
+		@Test
+		void dtoNull() {
+			final long electionId = 63L;
+			final ElectionUpdateDto dto = null;
+			assertThatThrownBy(() -> ElectionMapper.fromDto(electionId, dto))
 					.isInstanceOf(NullPointerException.class);
 		}
 	}
