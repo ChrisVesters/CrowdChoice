@@ -6,6 +6,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -17,6 +18,9 @@ import java.util.Optional;
 
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
+import org.mockito.InOrder;
 
 import com.cvesters.crowdchoice.candidate.bdo.Candidate;
 import com.cvesters.crowdchoice.candidate.dao.CandidateDao;
@@ -136,6 +140,65 @@ class CandidateServiceTest {
 			assertThatThrownBy(
 					() -> candidateService.create(ELECTION_ID, candidate))
 							.isInstanceOf(NullPointerException.class);
+		}
+	}
+
+	@Nested
+	class Update {
+
+		@ParameterizedTest
+		@MethodSource("com.cvesters.crowdchoice.candidate.TestCandidate#candidates")
+		void success(final TestCandidate candidate) {
+			final long electionId = candidate.election().id();
+			final var request = candidate.bdo();
+			final var expectedDao = candidate.dao();
+
+			when(candidateRepository.findByElectionIdAndId(ELECTION_ID,
+					candidate.id())).thenReturn(Optional.of(expectedDao));
+			when(candidateRepository.save(expectedDao)).thenReturn(expectedDao);
+
+			final Candidate updated = candidateService.update(electionId,
+					request);
+
+			candidate.assertEquals(updated);
+
+			final InOrder inOrder = inOrder(candidateRepository, expectedDao);
+			inOrder.verify(candidateRepository)
+					.findByElectionIdAndId(ELECTION_ID, candidate.id());
+			inOrder.verify(expectedDao).setName(candidate.name());
+			inOrder.verify(expectedDao).setDescription(candidate.description());
+			inOrder.verify(candidateRepository).save(expectedDao);
+		}
+
+		@Test
+		void electionNotFound() {
+			final var request = CANDIDATE.bdo();
+			doThrow(new NotFoundException()).when(electionService)
+					.verifyExists(ELECTION_ID);
+
+			assertThatThrownBy(
+					() -> candidateService.update(ELECTION_ID, request))
+							.isInstanceOf(NotFoundException.class);
+		}
+
+		@Test
+		void candidateNotFound() {
+			final var request = CANDIDATE.bdo();
+
+			when(candidateRepository.findByElectionIdAndId(ELECTION_ID,
+					CANDIDATE_ID)).thenReturn(Optional.empty());
+
+			assertThatThrownBy(
+					() -> candidateService.update(ELECTION_ID, request))
+							.isInstanceOf(NotFoundException.class);
+		}
+
+		@Test
+		void candidateNull() {
+			final long electionId = 123L;
+
+			assertThatThrownBy(() -> candidateService.update(electionId, null))
+					.isInstanceOf(NullPointerException.class);
 		}
 	}
 

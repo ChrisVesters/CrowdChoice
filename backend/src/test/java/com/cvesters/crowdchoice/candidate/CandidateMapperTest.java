@@ -14,6 +14,7 @@ import com.cvesters.crowdchoice.candidate.bdo.Candidate;
 import com.cvesters.crowdchoice.candidate.dao.CandidateDao;
 import com.cvesters.crowdchoice.candidate.dto.CandidateCreateDto;
 import com.cvesters.crowdchoice.candidate.dto.CandidateDto;
+import com.cvesters.crowdchoice.candidate.dto.CandidateUpdateDto;
 
 class CandidateMapperTest {
 
@@ -80,6 +81,7 @@ class CandidateMapperTest {
 			assertThat(dao.getId()).isNull();
 			assertThat(dao.getElectionId()).isEqualTo(ELECTION_ID);
 			assertThat(dao.getName()).isEqualTo(CANDIDATE.name());
+			assertThat(dao.getDescription()).isEqualTo(CANDIDATE.description());
 		}
 
 		@Test
@@ -114,7 +116,7 @@ class CandidateMapperTest {
 	}
 
 	@Nested
-	class FromDto {
+	class FromCreateDto {
 
 		@Test
 		void success() {
@@ -126,6 +128,7 @@ class CandidateMapperTest {
 
 			assertThat(result.getId()).isNull();
 			assertThat(result.getName()).isEqualTo(candidate.name());
+			assertThat(result.getDescription()).isEqualTo(candidate.description());
 		}
 
 		@Test
@@ -133,6 +136,32 @@ class CandidateMapperTest {
 			final CandidateCreateDto dto = null;
 
 			assertThatThrownBy(() -> CandidateMapper.fromDto(dto))
+					.isInstanceOf(NullPointerException.class);
+		}
+	}
+
+	@Nested
+	class FromUpdateDto {
+
+		@Test
+		void success() {
+			final TestCandidate candidate = TestCandidate.MICRONAUT;
+			final var dto = new CandidateUpdateDto(candidate.name(),
+					candidate.description());
+
+			final Candidate result = CandidateMapper.fromDto(candidate.id(),dto);
+
+			assertThat(result.getId()).isEqualTo(candidate.id());
+			assertThat(result.getName()).isEqualTo(candidate.name());
+			assertThat(result.getDescription()).isEqualTo(candidate.description());
+		}
+
+		@Test
+		void dtoNull() {
+			final long electionId = 63L;
+			final CandidateUpdateDto dto = null;
+
+			assertThatThrownBy(() -> CandidateMapper.fromDto(electionId, dto))
 					.isInstanceOf(NullPointerException.class);
 		}
 	}
@@ -149,6 +178,7 @@ class CandidateMapperTest {
 
 			assertThat(dto.id()).isEqualTo(candidate.id());
 			assertThat(dto.name()).isEqualTo(candidate.name());
+			assertThat(dto.description()).isEqualTo(candidate.description());
 		}
 
 		@Test
