@@ -70,7 +70,7 @@ class ElectionControllerTest {
 			when(electionService.findAll()).thenReturn(infos);
 
 			final String expectedBody = elections.stream()
-					.map(foundElection -> infoJson(foundElection))
+					.map(ElectionControllerTest::infoJson)
 					.collect(Collectors.joining(",", "[", "]"));
 
 			final RequestBuilder request = get(BASE_URL);
@@ -91,7 +91,7 @@ class ElectionControllerTest {
 			when(electionService.findAll()).thenReturn(infos);
 
 			final String expectedBody = elections.stream()
-					.map(election -> infoJson(election))
+					.map(ElectionControllerTest::infoJson)
 					.collect(Collectors.joining(",", "[", "]"));
 
 			final RequestBuilder request = get(BASE_URL);
@@ -147,6 +147,9 @@ class ElectionControllerTest {
 				assertThat(request.getTopic()).isEqualTo(election.topic());
 				assertThat(request.getDescription())
 						.isEqualTo(election.description());
+				assertThat(request.getStartedOn())
+						.isEqualTo(election.startedOn());
+				assertThat(request.getEndedOn()).isEqualTo(election.endedOn());
 				return true;
 			}))).thenReturn(election.info());
 
@@ -224,6 +227,9 @@ class ElectionControllerTest {
 				assertThat(request.getTopic()).isEqualTo(election.topic());
 				assertThat(request.getDescription())
 						.isEqualTo(election.description());
+				assertThat(request.getStartedOn())
+						.isEqualTo(election.startedOn());
+				assertThat(request.getEndedOn()).isEqualTo(election.endedOn());
 				return true;
 			}))).thenReturn(election.info());
 
@@ -335,7 +341,7 @@ class ElectionControllerTest {
 		}
 	}
 
-	private String infoJson(final TestElection election) {
+	private static String infoJson(final TestElection election) {
 		return """
 				{
 					"id": %d,
@@ -349,7 +355,7 @@ class ElectionControllerTest {
 				map(election.endedOn()));
 	}
 
-	private String map(final OffsetDateTime timestamp) {
+	private static String map(final OffsetDateTime timestamp) {
 		return Optional.ofNullable(timestamp)
 				.map(DateTimeFormatter.ISO_DATE_TIME::format)
 				.map(value -> "\"" + value + "\"")

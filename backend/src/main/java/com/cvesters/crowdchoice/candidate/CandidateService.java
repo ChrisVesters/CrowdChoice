@@ -43,6 +43,20 @@ public class CandidateService {
 		return CandidateMapper.fromDao(saved);
 	}
 
+	public Candidate update(final long electionId, final Candidate candidate) {
+		Objects.requireNonNull(candidate);
+		electionService.verifyExists(electionId);
+
+		final CandidateDao dao = candidateRepository
+				.findByElectionIdAndId(electionId, candidate.getId())
+				.orElseThrow(NotFoundException::new);
+
+		CandidateMapper.updateDao(candidate, dao);
+		final CandidateDao saved = candidateRepository.save(dao);
+
+		return CandidateMapper.fromDao(saved);
+	}
+
 	public void delete(final long electionId, final long candidateId) {
 		electionService.verifyExists(electionId);
 

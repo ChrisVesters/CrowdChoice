@@ -1,6 +1,8 @@
 package com.cvesters.crowdchoice.candidate;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
@@ -9,6 +11,7 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -18,6 +21,8 @@ import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.http.MediaType;
@@ -70,7 +75,7 @@ class CandidateControllerTest {
 			final RequestBuilder request = get(BASE_URL);
 
 			final String expectedBody = candidates.stream()
-					.map(TestCandidate::infoJson)
+					.map(CandidateControllerTest::infoJson)
 					.collect(Collectors.joining(",", "[", "]"));
 
 			mockMvc.perform(request)
@@ -92,7 +97,7 @@ class CandidateControllerTest {
 			final RequestBuilder request = get(BASE_URL);
 
 			final String expectedBody = candidates.stream()
-					.map(TestCandidate::infoJson)
+					.map(CandidateControllerTest::infoJson)
 					.collect(Collectors.joining(",", "[", "]"));
 
 			mockMvc.perform(request)
@@ -117,7 +122,8 @@ class CandidateControllerTest {
 		@Test
 		void success() throws Exception {
 			final TestCandidate candidate = TestCandidate.LOMBOK;
-			final String requestBody = candidate.requestJson();
+			final String requestBody = requestJson(candidate.name(),
+					candidate.description());
 
 			final Candidate bdo = candidate.bdo();
 
@@ -135,13 +141,33 @@ class CandidateControllerTest {
 
 			mockMvc.perform(request)
 					.andExpect(status().isCreated())
-					.andExpect(content().json(candidate.infoJson()));
+					.andExpect(content().json(infoJson(candidate)));
+		}
+
+		@Test
+		void withoutBody() throws Exception {
+			final RequestBuilder request = post(BASE_URL)
+					.contentType(MediaType.APPLICATION_JSON_VALUE);
+
+			mockMvc.perform(request).andExpect(status().isBadRequest());
+		}
+
+		@Test
+		void invalid() throws Exception {
+			final String requestBody = requestJson("", "");
+
+			final RequestBuilder request = post(BASE_URL)
+					.contentType(MediaType.APPLICATION_JSON_VALUE)
+					.content(requestBody);
+
+			mockMvc.perform(request).andExpect(status().isBadRequest());
 		}
 
 		@Test
 		void duplicate() throws Exception {
 			final TestCandidate candidate = TestCandidate.LOMBOK;
-			final String requestBody = candidate.requestJson();
+			final String requestBody = requestJson(candidate.name(),
+					candidate.description());
 
 			when(candidateService.create(eq(ELECTION_ID), argThat(request -> {
 				assertThat(request.getId()).isNull();
@@ -159,7 +185,8 @@ class CandidateControllerTest {
 		@Test
 		void electionNotFound() throws Exception {
 			final TestCandidate candidate = TestCandidate.LOMBOK;
-			final String requestBody = candidate.requestJson();
+			final String requestBody = requestJson(candidate.name(),
+					candidate.description());
 
 			when(candidateService.create(eq(ELECTION_ID), argThat(request -> {
 				assertThat(request.getId()).isNull();
@@ -172,6 +199,122 @@ class CandidateControllerTest {
 					.content(requestBody);
 
 			mockMvc.perform(request).andExpect(status().isNotFound());
+		}
+
+		@Test
+		void error() throws Exception {
+			final TestCandidate candidate = TestCandidate.LOMBOK;
+			final String requestBody = requestJson(candidate.name(),
+					candidate.description());
+
+			when(candidateService.create(anyLong(), any()))
+					.thenThrow(RuntimeException.class);
+
+			final RequestBuilder request = post(BASE_URL)
+					.contentType(MediaType.APPLICATION_JSON_VALUE)
+					.content(requestBody);
+
+			mockMvc.perform(request).andExpect(status().is5xxServerError());
+		}
+
+		private String requestJson(final String name,
+				final String description) {
+			return """
+					{
+						"name": "%s",
+						"description": "%s"
+					}
+					""".formatted(name, description);
+		}
+	}
+
+	@Nested
+	class Update {
+
+		@ParameterizedTest
+		@MethodSource("com.cvesters.crowdchoice.candidate.TestCandidate#candidates")
+		void success(final TestCandidate candidate) throws Exception {
+			final String requestBody = updateJson(candidate.name(),
+					candidate.description());
+
+			when(candidateService.update(eq(ELECTION_ID), argThat(request -> {
+				assertThat(request.getId()).isEqualTo(candidate.id());
+				assertThat(request.getName()).isEqualTo(candidate.name());
+				assertThat(request.getDescription())
+						.isEqualTo(candidate.description());
+				return true;
+			}))).thenReturn(candidate.bdo());
+
+			final RequestBuilder request = put(BASE_URL + "/" + candidate.id())
+					.contentType(MediaType.APPLICATION_JSON_VALUE)
+					.content(requestBody);
+
+			mockMvc.perform(request)
+					.andExpect(status().isOk())
+					.andExpect(content().json(infoJson(candidate)));
+		}
+
+		@Test
+		void withoutBody() throws Exception {
+			final long candidateId = 234L;
+			final RequestBuilder request = put(BASE_URL + "/" + candidateId)
+					.contentType(MediaType.APPLICATION_JSON_VALUE);
+
+			mockMvc.perform(request).andExpect(status().isBadRequest());
+		}
+
+		@Test
+		void invalid() throws Exception {
+			final String requestBody = updateJson("", "");
+
+			final long candidateId = 234L;
+			final RequestBuilder request = put(BASE_URL + "/" + candidateId)
+					.contentType(MediaType.APPLICATION_JSON_VALUE)
+					.content(requestBody);
+
+			mockMvc.perform(request).andExpect(status().isBadRequest());
+		}
+
+		@Test
+		void notFound() throws Exception {
+			final TestCandidate candidate = TestCandidate.LOMBOK;
+
+			final String requestBody = updateJson(candidate.name(),
+					candidate.description());
+
+			when(candidateService.update(anyLong(), any()))
+					.thenThrow(NotFoundException.class);
+
+			final RequestBuilder request = put(BASE_URL + "/" + candidate.id())
+					.contentType(MediaType.APPLICATION_JSON_VALUE)
+					.content(requestBody);
+
+			mockMvc.perform(request).andExpect(status().isNotFound());
+		}
+
+		@Test
+		void error() throws Exception {
+			final TestCandidate candidate = TestCandidate.LOMBOK;
+			final String requestBody = updateJson(candidate.name(),
+					candidate.description());
+
+			when(candidateService.update(anyLong(), any()))
+					.thenThrow(RuntimeException.class);
+
+			final RequestBuilder request = put(BASE_URL + "/" + candidate.id())
+					.contentType(MediaType.APPLICATION_JSON_VALUE)
+					.content(requestBody);
+
+			mockMvc.perform(request).andExpect(status().is5xxServerError());
+		}
+
+		private String updateJson(final String name, final String description) {
+			return """
+					{
+						"name": "%s",
+						"description": "%s"
+					}
+					""".formatted(name, description);
 		}
 	}
 
@@ -202,5 +345,16 @@ class CandidateControllerTest {
 
 			mockMvc.perform(request).andExpect(status().isNotFound());
 		}
+	}
+
+	private static String infoJson(final TestCandidate candidate) {
+		return """
+				{
+					"id": %d,
+					"name": "%s",
+					"description": "%s"
+				}
+				""".formatted(candidate.id(), candidate.name(),
+				candidate.description());
 	}
 }

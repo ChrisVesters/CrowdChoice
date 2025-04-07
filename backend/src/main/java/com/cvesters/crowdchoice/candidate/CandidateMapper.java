@@ -7,6 +7,7 @@ import com.cvesters.crowdchoice.candidate.bdo.Candidate;
 import com.cvesters.crowdchoice.candidate.dao.CandidateDao;
 import com.cvesters.crowdchoice.candidate.dto.CandidateCreateDto;
 import com.cvesters.crowdchoice.candidate.dto.CandidateDto;
+import com.cvesters.crowdchoice.candidate.dto.CandidateUpdateDto;
 
 public final class CandidateMapper {
 
@@ -38,6 +39,13 @@ public final class CandidateMapper {
 		Objects.requireNonNull(dto);
 
 		return new Candidate(dto.name(), dto.description());
+	}
+
+	public static Candidate fromDto(final long candidateId,
+			final CandidateUpdateDto dto) {
+		Objects.requireNonNull(dto);
+
+		return new Candidate(candidateId, dto.name(), dto.description());
 	}
 
 	public static List<CandidateDto> toDto(final List<Candidate> candidates) {

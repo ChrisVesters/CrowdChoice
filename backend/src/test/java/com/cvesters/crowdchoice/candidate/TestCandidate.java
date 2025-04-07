@@ -5,6 +5,9 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.withSettings;
 
+import java.util.stream.Stream;
+
+import org.junit.jupiter.params.provider.Arguments;
 import org.mockito.quality.Strictness;
 
 import com.cvesters.crowdchoice.candidate.bdo.Candidate;
@@ -12,7 +15,8 @@ import com.cvesters.crowdchoice.candidate.dao.CandidateDao;
 import com.cvesters.crowdchoice.candidate.dto.CandidateDto;
 import com.cvesters.crowdchoice.election.TestElection;
 
-public record TestCandidate(long id, TestElection election, String name, String description) {
+public record TestCandidate(long id, TestElection election, String name,
+		String description) {
 
 	public static final TestCandidate MICRONAUT = new TestCandidate(1,
 			TestElection.TOPICS, "Micronaut", "Getting rid of reflection");
@@ -25,6 +29,11 @@ public record TestCandidate(long id, TestElection election, String name, String 
 			TestElection.FEDERAL_ELECTIONS_2024, "Trump", "Republican");
 	public static final TestCandidate BIDEN = new TestCandidate(5,
 			TestElection.FEDERAL_ELECTIONS_2024, "Biden", "Democrat");
+
+	public static final Stream<Arguments> candidates() {
+		return Stream.of(Arguments.of(MICRONAUT), Arguments.of(DOCKER),
+				Arguments.of(LOMBOK));
+	}
 
 	public Candidate bdo() {
 		return new Candidate(id, name, description);
@@ -40,25 +49,6 @@ public record TestCandidate(long id, TestElection election, String name, String 
 		when(dao.getDescription()).thenReturn(description);
 
 		return dao;
-	}
-
-	public String infoJson() {
-		return """
-				{
-					"id": %d,
-					"name": "%s",
-					"description": "%s"
-				}
-				""".formatted(id, name, description);
-	}
-
-	public String requestJson() {
-		return """
-			{
-				"name": "%s",
-				"description": "%s"
-			}
-			""".formatted(name, description);
 	}
 
 	public void assertEquals(final CandidateDao actual) {
