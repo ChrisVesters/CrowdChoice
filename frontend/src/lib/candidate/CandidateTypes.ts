@@ -8,3 +8,8 @@ export type CreateCandidateRequest = {
 	name: string;
 	description: string;
 }
+
+export type UpdateCandidateRequest = {
+	name: string;
+	description: string;
+}
