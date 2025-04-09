@@ -1,4 +1,8 @@
-import type { Candidate, CreateCandidateRequest } from "./CandidateTypes";
+import type {
+	Candidate,
+	CreateCandidateRequest,
+	UpdateCandidateRequest
+} from "./CandidateTypes";
 
 export class CandidateClient {
 	// TODO: or create instance with the correct electionId?
@@ -13,6 +17,20 @@ export class CandidateClient {
 	): Promise<Candidate> {
 		return fetch(getEndpoint(electionId), {
 			method: "POST",
+			headers: {
+				"Content-Type": "application/json"
+			},
+			body: JSON.stringify(request)
+		}).then(res => res.json());
+	}
+
+	public static async update(
+		electionId: number,
+		candidateId: number,
+		request: UpdateCandidateRequest
+	): Promise<Candidate> {
+		return fetch(`${getEndpoint(electionId)}/${candidateId}`, {
+			method: "PUT",
 			headers: {
 				"Content-Type": "application/json"
 			},

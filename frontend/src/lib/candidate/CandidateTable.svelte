@@ -6,7 +6,8 @@
 	import { CandidateClient } from "./CandidateClient";
 
 	import AddCandidateDialog from "./AddCandidateDialog.svelte";
-	import type { Candidate, CreateCandidateRequest } from "./CandidateTypes";
+	import type { Candidate, CreateCandidateRequest, UpdateCandidateRequest } from "./CandidateTypes";
+	import UpdateCandidateDialog from "./UpdateCandidateDialog.svelte";
 
 	export type CandidateTableprops = {
 		electionId: number;
@@ -19,6 +20,7 @@
 
 	let selected: Array<number> = $state([]);
 	let isAddCandidateDialogVisible: boolean = $state(false);
+	let isUpdateCandidateDialogVisible: boolean = $state(false);
 
 	const toggleAll: ChangeEventHandler<HTMLInputElement> = e => {
 		if (props.candidates.length == 0) {
@@ -53,6 +55,22 @@
 			props.onAdd(candidate.id)
 		);
 	}
+
+	function showUpdateCandidateDialog(): void {
+		isUpdateCandidateDialogVisible = true;
+	}
+
+	function hideUpdateCandidateDialog(): void {
+		isUpdateCandidateDialogVisible = false;
+	}
+
+	function updateCandidate(
+		candidateId: number,
+		request: UpdateCandidateRequest
+	): void {
+		hideUpdateCandidateDialog();
+		CandidateClient.update(props.electionId, candidateId, request).then(props.onChange);
+	}
 </script>
 
 <button onclick={handleRemoveCandidates} disabled={selected.length == 0}>
@@ -60,6 +78,9 @@
 </button>
 <button onclick={showAddCandidateDialog}>
 	{$t("common.add")}
+</button>
+<button onclick={showUpdateCandidateDialog} disabled={selected.length != 1}>
+	{$t("common.edit")}
 </button>
 
 <table>
@@ -101,4 +122,13 @@
 
 {#if isAddCandidateDialogVisible === true}
 	<AddCandidateDialog onClose={hideAddCandidateDialog} onAdd={addCandidate} />
+{/if}
+
+{#if isUpdateCandidateDialogVisible === true}
+	<UpdateCandidateDialog
+		onClose={hideUpdateCandidateDialog}
+		onUpdate={updateCandidate}
+		candidate={props.candidates.find(e => e.id === selected[0]) ??
+			props.candidates[0]}
+	/>
 {/if}
