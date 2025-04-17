@@ -23,6 +23,7 @@ import org.mockito.InOrder;
 import com.cvesters.crowdchoice.election.bdo.ElectionInfo;
 import com.cvesters.crowdchoice.election.dao.ElectionDao;
 import com.cvesters.crowdchoice.exceptions.NotFoundException;
+import com.cvesters.crowdchoice.exceptions.OperationNotAllowedException;
 
 class ElectionServiceTest {
 
@@ -155,9 +156,9 @@ class ElectionServiceTest {
 	@Nested
 	class Update {
 
-		@ParameterizedTest
-		@MethodSource("com.cvesters.crowdchoice.election.TestElection#elections")
-		void create(final TestElection election) {
+		@Test
+		void update() {
+			final TestElection election = TestElection.TOPICS;
 			final var request = election.info();
 			final ElectionDao expectedDao = election.dao();
 
@@ -198,6 +199,33 @@ class ElectionServiceTest {
 
 			assertThatThrownBy(() -> electionService.update(request))
 					.isInstanceOf(NotFoundException.class);
+		}
+
+		@Test
+		void electionInProgress() {
+			final TestElection election = TestElection.COLOURS;
+			final ElectionDao expectedDao = election.dao();
+
+			when(electionRepository.findById(election.id()))
+					.thenReturn(Optional.of(expectedDao));
+
+			final ElectionInfo info = election.info();
+			assertThatThrownBy(() -> electionService.update(info))
+					.isInstanceOf(OperationNotAllowedException.class);
+		}
+
+		@Test
+		void electionEnded() {
+			final TestElection election = TestElection.FEDERAL_ELECTIONS_2024;
+			final ElectionDao expectedDao = election.dao();
+
+			when(electionRepository.findById(election.id()))
+					.thenReturn(Optional.of(expectedDao));
+
+			final ElectionInfo info = election.info();
+			assertThatThrownBy(() -> electionService.update(info))
+					.isInstanceOf(OperationNotAllowedException.class);
+
 		}
 	}
 

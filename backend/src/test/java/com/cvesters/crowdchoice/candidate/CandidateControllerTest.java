@@ -33,6 +33,7 @@ import org.springframework.test.web.servlet.RequestBuilder;
 import com.cvesters.crowdchoice.candidate.bdo.Candidate;
 import com.cvesters.crowdchoice.exceptions.ConflictException;
 import com.cvesters.crowdchoice.exceptions.NotFoundException;
+import com.cvesters.crowdchoice.exceptions.OperationNotAllowedException;
 
 @WebMvcTest(CandidateController.class)
 class CandidateControllerTest {
@@ -217,6 +218,22 @@ class CandidateControllerTest {
 			mockMvc.perform(request).andExpect(status().is5xxServerError());
 		}
 
+		@Test
+		void operationNotAllowed() throws Exception {
+			final TestCandidate candidate = TestCandidate.LOMBOK;
+			final String requestBody = requestJson(candidate.name(),
+					candidate.description());
+
+			when(candidateService.create(anyLong(), any()))
+					.thenThrow(OperationNotAllowedException.class);
+
+			final RequestBuilder request = post(BASE_URL)
+					.contentType(MediaType.APPLICATION_JSON_VALUE)
+					.content(requestBody);
+
+			mockMvc.perform(request).andExpect(status().isMethodNotAllowed());
+		}
+
 		private String requestJson(final String name,
 				final String description) {
 			return """
@@ -308,6 +325,22 @@ class CandidateControllerTest {
 			mockMvc.perform(request).andExpect(status().is5xxServerError());
 		}
 
+		@Test
+		void operationNotAllowed() throws Exception {
+			final TestCandidate candidate = TestCandidate.LOMBOK;
+			final String requestBody = updateJson(candidate.name(),
+					candidate.description());
+
+			when(candidateService.update(anyLong(), any()))
+					.thenThrow(OperationNotAllowedException.class);
+
+			final RequestBuilder request = put(BASE_URL + "/" + candidate.id())
+					.contentType(MediaType.APPLICATION_JSON_VALUE)
+					.content(requestBody);
+
+			mockMvc.perform(request).andExpect(status().isMethodNotAllowed());
+		}
+
 		private String updateJson(final String name, final String description) {
 			return """
 					{
@@ -345,6 +378,20 @@ class CandidateControllerTest {
 
 			mockMvc.perform(request).andExpect(status().isNotFound());
 		}
+
+		@Test
+		void operationNotAllowed() throws Exception {
+			final TestCandidate candidate = TestCandidate.LOMBOK;
+
+			doThrow(new OperationNotAllowedException()).when(candidateService)
+					.delete(ELECTION_ID, candidate.id());
+
+			final RequestBuilder request = delete(
+					BASE_URL + "/" + candidate.id());
+
+			mockMvc.perform(request).andExpect(status().isMethodNotAllowed());
+		}
+
 	}
 
 	private static String infoJson(final TestCandidate candidate) {

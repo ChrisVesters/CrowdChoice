@@ -33,6 +33,7 @@ import org.springframework.test.web.servlet.RequestBuilder;
 
 import com.cvesters.crowdchoice.election.bdo.ElectionInfo;
 import com.cvesters.crowdchoice.exceptions.NotFoundException;
+import com.cvesters.crowdchoice.exceptions.OperationNotAllowedException;
 
 @WebMvcTest(ElectionController.class)
 class ElectionControllerTest {
@@ -296,6 +297,23 @@ class ElectionControllerTest {
 					.content(requestBody);
 
 			mockMvc.perform(request).andExpect(status().is5xxServerError());
+		}
+
+		@Test
+		void operationNotAllowed() throws Exception {
+			final TestElection election = TestElection.TOPICS;
+			final String requestBody = updateJson(election.topic(),
+					election.description(), election.startedOn(),
+					election.endedOn());
+
+			when(electionService.update(any()))
+					.thenThrow(OperationNotAllowedException.class);
+
+			final RequestBuilder request = put(BASE_URL + "/" + election.id())
+					.contentType(MediaType.APPLICATION_JSON_VALUE)
+					.content(requestBody);
+
+			mockMvc.perform(request).andExpect(status().isMethodNotAllowed());
 		}
 
 		private String updateJson(final String topic, final String description,

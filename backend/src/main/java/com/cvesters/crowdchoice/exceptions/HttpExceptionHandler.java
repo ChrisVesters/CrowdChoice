@@ -19,6 +19,11 @@ public class HttpExceptionHandler extends ResponseEntityExceptionHandler {
 		return ResponseEntity.status(HttpStatus.CONFLICT).build();
 	}
 
+	@ExceptionHandler(OperationNotAllowedException.class)
+	public ResponseEntity<Void> handle(final OperationNotAllowedException e) {
+		return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED).build();
+	}
+
 	@ExceptionHandler(Exception.class)
 	public ResponseEntity<Void> handleUnexpected(final Exception e) {
 		return ResponseEntity.internalServerError().build();

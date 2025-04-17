@@ -10,6 +10,7 @@ import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.Collections;
@@ -27,6 +28,7 @@ import com.cvesters.crowdchoice.candidate.dao.CandidateDao;
 import com.cvesters.crowdchoice.election.ElectionService;
 import com.cvesters.crowdchoice.election.TestElection;
 import com.cvesters.crowdchoice.exceptions.NotFoundException;
+import com.cvesters.crowdchoice.exceptions.OperationNotAllowedException;
 
 class CandidateServiceTest {
 
@@ -109,6 +111,8 @@ class CandidateServiceTest {
 			final var request = new Candidate(CANDIDATE.name(),
 					CANDIDATE.description());
 
+			when(electionService.get(ELECTION_ID)).thenReturn(ELECTION.info());
+
 			when(candidateRepository.save(argThat(saved -> {
 				assertThat(saved.getId()).isNull();
 				assertThat(saved.getElectionId()).isEqualTo(ELECTION_ID);
@@ -126,8 +130,9 @@ class CandidateServiceTest {
 		void electionNotFound() {
 			final var request = new Candidate(CANDIDATE.name(),
 					CANDIDATE.description());
+
 			doThrow(new NotFoundException()).when(electionService)
-					.verifyExists(ELECTION_ID);
+					.get(ELECTION_ID);
 
 			assertThatThrownBy(
 					() -> candidateService.create(ELECTION_ID, request))
@@ -141,6 +146,23 @@ class CandidateServiceTest {
 					() -> candidateService.create(ELECTION_ID, candidate))
 							.isInstanceOf(NullPointerException.class);
 		}
+
+		@Test
+		void electionNotEditable() {
+			final TestCandidate candidate = TestCandidate.TRUMP;
+			final TestElection election = candidate.election();
+			final var request = new Candidate(candidate.name(),
+					candidate.description());
+
+			when(electionService.get(election.id()))
+					.thenReturn(election.info());
+
+			assertThatThrownBy(
+					() -> candidateService.create(election.id(), request))
+							.isInstanceOf(OperationNotAllowedException.class);
+
+			verifyNoInteractions(candidateRepository);
+		}
 	}
 
 	@Nested
@@ -152,6 +174,8 @@ class CandidateServiceTest {
 			final long electionId = candidate.election().id();
 			final var request = candidate.bdo();
 			final var expectedDao = candidate.dao();
+
+			when(electionService.get(ELECTION_ID)).thenReturn(ELECTION.info());
 
 			when(candidateRepository.findByElectionIdAndId(ELECTION_ID,
 					candidate.id())).thenReturn(Optional.of(expectedDao));
@@ -174,7 +198,7 @@ class CandidateServiceTest {
 		void electionNotFound() {
 			final var request = CANDIDATE.bdo();
 			doThrow(new NotFoundException()).when(electionService)
-					.verifyExists(ELECTION_ID);
+					.get(ELECTION_ID);
 
 			assertThatThrownBy(
 					() -> candidateService.update(ELECTION_ID, request))
@@ -184,6 +208,8 @@ class CandidateServiceTest {
 		@Test
 		void candidateNotFound() {
 			final var request = CANDIDATE.bdo();
+
+			when(electionService.get(ELECTION_ID)).thenReturn(ELECTION.info());
 
 			when(candidateRepository.findByElectionIdAndId(ELECTION_ID,
 					CANDIDATE_ID)).thenReturn(Optional.empty());
@@ -200,6 +226,23 @@ class CandidateServiceTest {
 			assertThatThrownBy(() -> candidateService.update(electionId, null))
 					.isInstanceOf(NullPointerException.class);
 		}
+
+		@Test
+		void electionNotEditable() {
+			final TestCandidate candidate = TestCandidate.TRUMP;
+			final TestElection election = candidate.election();
+			final var request = new Candidate(candidate.name(),
+					candidate.description());
+
+			when(electionService.get(election.id()))
+					.thenReturn(election.info());
+
+			assertThatThrownBy(
+					() -> candidateService.update(election.id(), request))
+							.isInstanceOf(OperationNotAllowedException.class);
+
+			verifyNoInteractions(candidateRepository);
+		}
 	}
 
 	@Nested
@@ -208,6 +251,9 @@ class CandidateServiceTest {
 		@Test
 		void success() {
 			final CandidateDao dao = CANDIDATE.dao();
+
+			when(electionService.get(ELECTION_ID)).thenReturn(ELECTION.info());
+
 			when(candidateRepository.findByElectionIdAndId(ELECTION_ID,
 					CANDIDATE_ID)).thenReturn(Optional.of(dao));
 
@@ -219,7 +265,7 @@ class CandidateServiceTest {
 		@Test
 		void electionNotFound() {
 			doThrow(new NotFoundException()).when(electionService)
-					.verifyExists(ELECTION_ID);
+					.get(ELECTION_ID);
 
 			assertThatThrownBy(
 					() -> candidateService.delete(ELECTION_ID, CANDIDATE_ID))
@@ -231,6 +277,8 @@ class CandidateServiceTest {
 
 		@Test
 		void candidateNotFound() {
+			when(electionService.get(ELECTION_ID)).thenReturn(ELECTION.info());
+
 			when(candidateRepository.findByElectionIdAndId(ELECTION_ID,
 					CANDIDATE_ID)).thenReturn(Optional.empty());
 
@@ -239,6 +287,21 @@ class CandidateServiceTest {
 							.isInstanceOf(NotFoundException.class);
 
 			verify(candidateRepository, never()).delete(any());
+		}
+
+		@Test
+		void electionNotEditable() {
+			final TestCandidate candidate = TestCandidate.TRUMP;
+			final TestElection election = candidate.election();
+
+			when(electionService.get(election.id()))
+					.thenReturn(election.info());
+
+			assertThatThrownBy(() -> candidateService.delete(election.id(),
+					candidate.id()))
+							.isInstanceOf(OperationNotAllowedException.class);
+
+			verifyNoInteractions(candidateRepository);
 		}
 	}
 
