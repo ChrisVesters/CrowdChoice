@@ -8,7 +8,9 @@ import org.springframework.stereotype.Service;
 import com.cvesters.crowdchoice.candidate.bdo.Candidate;
 import com.cvesters.crowdchoice.candidate.dao.CandidateDao;
 import com.cvesters.crowdchoice.election.ElectionService;
+import com.cvesters.crowdchoice.election.bdo.ElectionInfo;
 import com.cvesters.crowdchoice.exceptions.NotFoundException;
+import com.cvesters.crowdchoice.exceptions.OperationNotAllowedException;
 
 @Service
 public class CandidateService {
@@ -34,7 +36,11 @@ public class CandidateService {
 
 	public Candidate create(final long electionId, final Candidate candidate) {
 		Objects.requireNonNull(candidate);
-		electionService.verifyExists(electionId);
+
+		final ElectionInfo electionInfo = electionService.get(electionId);
+		if (!electionInfo.isEditable()) {
+			throw new OperationNotAllowedException();
+		}
 
 		final CandidateDao dao = new CandidateDao(electionId);
 		CandidateMapper.updateDao(candidate, dao);
@@ -45,7 +51,11 @@ public class CandidateService {
 
 	public Candidate update(final long electionId, final Candidate candidate) {
 		Objects.requireNonNull(candidate);
-		electionService.verifyExists(electionId);
+
+		final ElectionInfo electionInfo = electionService.get(electionId);
+		if (!electionInfo.isEditable()) {
+			throw new OperationNotAllowedException();
+		}
 
 		final CandidateDao dao = candidateRepository
 				.findByElectionIdAndId(electionId, candidate.getId())
@@ -58,7 +68,10 @@ public class CandidateService {
 	}
 
 	public void delete(final long electionId, final long candidateId) {
-		electionService.verifyExists(electionId);
+		final ElectionInfo electionInfo = electionService.get(electionId);
+		if (!electionInfo.isEditable()) {
+			throw new OperationNotAllowedException();
+		}
 
 		final CandidateDao candidate = candidateRepository
 				.findByElectionIdAndId(electionId, candidateId)

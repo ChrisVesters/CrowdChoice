@@ -26,6 +26,9 @@ public record TestElection(long id, String topic, String description,
 			2, "Federal Elections 2024", "Choose a new president.",
 			OffsetDateTime.of(2023, 10, 1, 8, 0, 0, 0, ZoneOffset.UTC),
 			OffsetDateTime.of(2023, 10, 1, 18, 0, 0, 0, ZoneOffset.UTC));
+	public static final TestElection COLOURS = new TestElection(2, "Colours",
+			"", OffsetDateTime.of(2025, 1, 1, 0, 0, 0, 0, ZoneOffset.UTC),
+			null);
 
 	public static final List<TestElection> ALL = List.of(TOPICS,
 			FEDERAL_ELECTIONS_2024);

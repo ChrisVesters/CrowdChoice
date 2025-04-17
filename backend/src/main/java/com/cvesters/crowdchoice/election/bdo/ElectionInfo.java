@@ -42,4 +42,8 @@ public class ElectionInfo {
 			final OffsetDateTime startedOn, final OffsetDateTime endedOn) {
 		this(null, topic, description, startedOn, endedOn);
 	}
+
+	public boolean isEditable() {
+		return startedOn == null || startedOn.isAfter(OffsetDateTime.now());
+	}
 }
