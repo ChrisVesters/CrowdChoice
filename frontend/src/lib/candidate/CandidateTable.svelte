@@ -6,12 +6,18 @@
 	import { CandidateClient } from "./CandidateClient";
 
 	import AddCandidateDialog from "./AddCandidateDialog.svelte";
-	import type { Candidate, CreateCandidateRequest, UpdateCandidateRequest } from "./CandidateTypes";
 	import UpdateCandidateDialog from "./UpdateCandidateDialog.svelte";
+
+	import type {
+		Candidate,
+		CreateCandidateRequest,
+		UpdateCandidateRequest
+	} from "./CandidateTypes";
 
 	export type CandidateTableprops = {
 		electionId: number;
 		candidates: Array<Candidate>;
+		editable: boolean;
 		onChange: () => void;
 		onAdd: (id: number) => void;
 	};
@@ -69,17 +75,25 @@
 		request: UpdateCandidateRequest
 	): void {
 		hideUpdateCandidateDialog();
-		CandidateClient.update(props.electionId, candidateId, request).then(props.onChange);
+		CandidateClient.update(props.electionId, candidateId, request).then(
+			props.onChange
+		);
 	}
 </script>
 
-<button onclick={handleRemoveCandidates} disabled={selected.length == 0}>
+<button
+	onclick={handleRemoveCandidates}
+	disabled={!props.editable || selected.length == 0}
+>
 	{$t("common.remove")}
 </button>
-<button onclick={showAddCandidateDialog}>
+<button onclick={showAddCandidateDialog} disabled={!props.editable}>
 	{$t("common.add")}
 </button>
-<button onclick={showUpdateCandidateDialog} disabled={selected.length != 1}>
+<button
+	onclick={showUpdateCandidateDialog}
+	disabled={!props.editable || selected.length != 1}
+>
 	{$t("common.edit")}
 </button>
 

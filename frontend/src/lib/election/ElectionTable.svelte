@@ -5,12 +5,13 @@
 
 	import AddElectionDialog from "./AddElectionDialog.svelte";
 	import { ElectionClient } from "./ElectionClient";
+	import UpdateElectionDialog from "./UpdateElectionDialog.svelte";
+
 	import type {
 		CreateElectionRequest,
 		Election,
 		UpdateElectionRequest
 	} from "./ElectionTypes";
-	import UpdateElectionDialog from "./UpdateElectionDialog.svelte";
 
 	export type ElectionTableProps = {
 		elections: Array<Election>;
@@ -23,6 +24,10 @@
 	let selected: Array<number> = $state([]);
 	let isAddElectionDialogVisible: boolean = $state(false);
 	let isUpdateElectionDialogVisible: boolean = $state(false);
+
+	let selectedElections = $derived(
+		props.elections.filter(election => selected.includes(election.id))
+	);
 
 	const toggleAll: ChangeEventHandler<HTMLInputElement> = e => {
 		if (props.elections.length == 0) {
@@ -72,6 +77,13 @@
 		ElectionClient.update(electionId, request).then(props.onChange);
 	}
 
+	function isEditable(election: Election): boolean {
+		return (
+			election.startedOn == null ||
+			new Date(election.startedOn) > new Date()
+		);
+	}
+
 	function getStatus(election: Election): string {
 		if (election.startedOn == null) {
 			return $t("common.draft");
@@ -88,13 +100,17 @@
 	}
 </script>
 
-<button onclick={handleRemoveElections} disabled={selected.length == 0}>
-	{$t("common.remove")}
-</button>
 <button onclick={showAddElectionDialog}>
 	{$t("common.add")}
 </button>
-<button onclick={showUpdateElectionDialog} disabled={selected.length != 1}>
+<button onclick={handleRemoveElections} disabled={selected.length == 0}>
+	{$t("common.remove")}
+</button>
+<button
+	onclick={showUpdateElectionDialog}
+	disabled={selectedElections.length != 1 ||
+		!isEditable(selectedElections[0])}
+>
 	{$t("common.edit")}
 </button>
 
@@ -147,7 +163,8 @@
 	<UpdateElectionDialog
 		onClose={hideUpdateElectionDialog}
 		onUpdate={updateElection}
-		election={props.elections.find(e => e.id === selected[0]) ??
-			props.elections[0]}
+		election={selectedElections.length > 0
+			? selectedElections[0]
+			: props.elections[0]}
 	/>
 {/if}
