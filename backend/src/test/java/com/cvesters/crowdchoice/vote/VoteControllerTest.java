@@ -24,6 +24,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.RequestBuilder;
 
+import com.cvesters.crowdchoice.exceptions.OperationNotAllowedException;
 import com.cvesters.crowdchoice.vote.dao.VoteCountView;
 
 @WebMvcTest(VoteController.class)
@@ -147,6 +148,21 @@ class VoteControllerTest {
 					.content(requestBody);
 
 			mockMvc.perform(request).andExpect(status().is5xxServerError());
+		}
+
+		@Test
+		void operationNotAllowed() throws Exception{
+			final TestVote election = TestVote.TRUMP;
+			final String requestBody = requestJson(election);
+
+			when(voteService.create(anyLong(), any()))
+					.thenThrow(OperationNotAllowedException.class);
+
+			final RequestBuilder request = post(BASE_URL)
+					.contentType(MediaType.APPLICATION_JSON_VALUE)
+					.content(requestBody);
+
+			mockMvc.perform(request).andExpect(status().isMethodNotAllowed());
 		}
 
 		private String requestJson(final TestVote vote) {

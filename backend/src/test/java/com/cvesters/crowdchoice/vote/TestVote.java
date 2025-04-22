@@ -23,12 +23,16 @@ public record TestVote(long id, OffsetDateTime castedOn,
 			OffsetDateTime.of(2024, 12, 1, 8, 30, 0, 0, ZoneOffset.UTC),
 			TestCandidate.TRUMP);
 
+	public static final TestVote RED = new TestVote(4L, OffsetDateTime.now(),
+			TestCandidate.RED);
+
 	public Vote bdo() {
 		return new Vote(id, castedOn, candidate.id());
 	}
 
 	public VoteDto dto() {
-		final String castedOnString = DateTimeFormatter.ISO_DATE_TIME.format(castedOn);
+		final String castedOnString = DateTimeFormatter.ISO_DATE_TIME
+				.format(castedOn);
 		return new VoteDto(id, castedOnString, candidate.id());
 	}
 
@@ -51,7 +55,8 @@ public record TestVote(long id, OffsetDateTime castedOn,
 
 	public void assertEquals(final VoteDto dto) {
 		assertThat(dto.id()).isEqualTo(id);
-		assertThat(dto.castedOn()).isEqualTo(DateTimeFormatter.ISO_DATE_TIME.format(castedOn));
+		assertThat(dto.castedOn())
+				.isEqualTo(DateTimeFormatter.ISO_DATE_TIME.format(castedOn));
 		assertThat(dto.candidateId()).isEqualTo(candidate.id());
 	}
 }
