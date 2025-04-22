@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.time.OffsetDateTime;
+import java.time.Period;
 
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -140,6 +141,96 @@ public class ElectionInfoTest {
 			assertThatThrownBy(() -> new ElectionInfo(topic, DESCRIPTION,
 					STARTED_ON, ENDED_ON))
 							.isInstanceOf(IllegalArgumentException.class);
+		}
+	}
+
+	@Nested
+	class isEditable {
+
+		@Test
+		void draft() {
+			final ElectionInfo election = new ElectionInfo(TOPIC, DESCRIPTION,
+					null, null);
+
+			assertThat(election.isEditable()).isTrue();
+		}
+
+		@Test
+		void scheduled() {
+			final OffsetDateTime startsOn = OffsetDateTime.now()
+					.plus(Period.ofDays(7));
+			final ElectionInfo election = new ElectionInfo(TOPIC, DESCRIPTION,
+					startsOn, null);
+
+			assertThat(election.isEditable()).isTrue();
+		}
+
+		@Test
+		void ongoing() {
+			final OffsetDateTime startedOn = OffsetDateTime.now()
+					.minus(Period.ofDays(7));
+			final ElectionInfo election = new ElectionInfo(TOPIC, DESCRIPTION,
+					startedOn, null);
+
+			assertThat(election.isEditable()).isFalse();
+		}
+
+		@Test
+		void ended() {
+			final OffsetDateTime startedOn = OffsetDateTime.now()
+					.minus(Period.ofDays(7));
+			final OffsetDateTime endedOn = OffsetDateTime.now()
+					.minus(Period.ofDays(6));
+
+			final ElectionInfo election = new ElectionInfo(TOPIC, DESCRIPTION,
+					startedOn, endedOn);
+
+			assertThat(election.isEditable()).isFalse();
+		}
+	}
+
+	@Nested
+	class isActive {
+
+		@Test
+		void draft() {
+			final ElectionInfo election = new ElectionInfo(TOPIC, DESCRIPTION,
+					null, null);
+
+			assertThat(election.isActive()).isFalse();
+		}
+
+		@Test
+		void scheduled() {
+			final OffsetDateTime startsOn = OffsetDateTime.now()
+					.plus(Period.ofDays(7));
+			final ElectionInfo election = new ElectionInfo(TOPIC, DESCRIPTION,
+					startsOn, null);
+
+			assertThat(election.isActive()).isFalse();
+		}
+
+		@Test
+		void ongoing() {
+			final OffsetDateTime startedOn = OffsetDateTime.now()
+					.minus(Period.ofDays(7));
+			final ElectionInfo election = new ElectionInfo(TOPIC, DESCRIPTION,
+					startedOn, null);
+
+			assertThat(election.isActive()).isTrue();
+		}
+
+		@Test
+		void ended() {
+			final OffsetDateTime startedOn = OffsetDateTime.now()
+					.minus(Period.ofDays(7));
+			final OffsetDateTime endedOn = OffsetDateTime.now()
+					.minus(Period.ofDays(6));
+
+			final ElectionInfo election = new ElectionInfo(TOPIC, DESCRIPTION,
+					startedOn, endedOn);
+
+			assertThat(election.isActive()).isFalse();
 		}
 	}
 }

@@ -30,6 +30,9 @@ public record TestCandidate(long id, TestElection election, String name,
 	public static final TestCandidate BIDEN = new TestCandidate(5,
 			TestElection.FEDERAL_ELECTIONS_2024, "Biden", "Democrat");
 
+	public static final TestCandidate RED = new TestCandidate(6,
+			TestElection.COLOURS, "Red", "Colour of love");
+
 	public static final Stream<Arguments> candidates() {
 		return Stream.of(Arguments.of(MICRONAUT), Arguments.of(DOCKER),
 				Arguments.of(LOMBOK));

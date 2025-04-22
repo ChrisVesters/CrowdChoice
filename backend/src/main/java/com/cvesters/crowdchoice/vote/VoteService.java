@@ -7,6 +7,8 @@ import org.springframework.stereotype.Service;
 
 import com.cvesters.crowdchoice.candidate.CandidateService;
 import com.cvesters.crowdchoice.election.ElectionService;
+import com.cvesters.crowdchoice.election.bdo.ElectionInfo;
+import com.cvesters.crowdchoice.exceptions.OperationNotAllowedException;
 import com.cvesters.crowdchoice.vote.bdo.Vote;
 import com.cvesters.crowdchoice.vote.dao.VoteCountView;
 import com.cvesters.crowdchoice.vote.dao.VoteDao;
@@ -35,7 +37,12 @@ public class VoteService {
 
 	public Vote create(final long electionId, final Vote request) {
 		Objects.requireNonNull(request);
-		electionService.verifyExists(electionId);
+		
+		final ElectionInfo electionInfo = electionService.get(electionId);
+		if (!electionInfo.isActive()) {
+			throw new OperationNotAllowedException();
+		}
+		
 		candidateService.verifyExists(electionId, request.getCandidateId());
 
 		final VoteDao dao = new VoteDao(request.getCastedOn(),

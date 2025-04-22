@@ -44,6 +44,18 @@ public class ElectionInfo {
 	}
 
 	public boolean isEditable() {
-		return startedOn == null || startedOn.isAfter(OffsetDateTime.now());
+		return !hasStarted();
+	}
+
+	public boolean isActive() {
+		return hasStarted() && !hasEnded();
+	}
+
+	private boolean hasStarted() {
+		return startedOn != null && startedOn.isBefore(OffsetDateTime.now());
+	}
+
+	private boolean hasEnded() {
+		return endedOn != null && endedOn.isBefore(OffsetDateTime.now());
 	}
 }
