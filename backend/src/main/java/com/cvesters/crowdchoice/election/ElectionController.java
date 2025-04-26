@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -13,7 +14,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.cvesters.crowdchoice.election.bdo.ElectionAction;
 import com.cvesters.crowdchoice.election.bdo.ElectionInfo;
+import com.cvesters.crowdchoice.election.dto.ElectionActionDto;
 import com.cvesters.crowdchoice.election.dto.ElectionCreateDto;
 import com.cvesters.crowdchoice.election.dto.ElectionInfoDto;
 import com.cvesters.crowdchoice.election.dto.ElectionUpdateDto;
@@ -56,6 +59,15 @@ public class ElectionController {
 				electionDto);
 		final ElectionInfo created = electionService.update(requested);
 		return ElectionMapper.toDto(created);
+	}
+
+	// TODO: Patch with actions
+	@PatchMapping("/{electionId}")
+	public ElectionInfoDto apply(@PathVariable final long electionId,
+			@RequestBody final ElectionActionDto actionDto) {
+		final ElectionAction action = ElectionMapper.fromDto(electionId, actionDto);
+		final ElectionInfo updated = electionService.apply(action);
+		return ElectionMapper.toDto(updated);
 	}
 
 	@DeleteMapping("/{electionId}")

@@ -4,11 +4,16 @@ import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Objects;
 
+import com.cvesters.crowdchoice.election.bdo.ElectionAction;
 import com.cvesters.crowdchoice.election.bdo.ElectionInfo;
 import com.cvesters.crowdchoice.election.dao.ElectionDao;
+import com.cvesters.crowdchoice.election.dto.ElectionActionDto;
 import com.cvesters.crowdchoice.election.dto.ElectionCreateDto;
 import com.cvesters.crowdchoice.election.dto.ElectionInfoDto;
 import com.cvesters.crowdchoice.election.dto.ElectionUpdateDto;
+import com.cvesters.crowdchoice.election.dto.EndElectionDto;
+import com.cvesters.crowdchoice.election.dto.ScheduleStartElectionDto;
+import com.cvesters.crowdchoice.election.dto.StartElectionDto;
 
 public final class ElectionMapper {
 
@@ -52,6 +57,22 @@ public final class ElectionMapper {
 
 		return new ElectionInfo(electionId, dto.topic(), dto.description(),
 				dto.startedOn(), dto.endedOn());
+	}
+
+	public static ElectionAction fromDto(final long electionId,
+			final ElectionActionDto dto) {
+				Objects.requireNonNull(dto);
+
+		return switch (dto) {
+			case StartElectionDto _ -> new ElectionAction(electionId);
+			case ScheduleStartElectionDto (final OffsetDateTime startedOn) -> new ElectionAction(electionId);
+			case EndElectionDto _ -> new ElectionAction(electionId);
+			// case EndElectionDto _:
+		};
+
+		// return switch (dto.action) {
+		// 	case "start" -> new ElectionAction(electionId);
+		// }
 	}
 
 	public static List<ElectionInfoDto> toDto(
