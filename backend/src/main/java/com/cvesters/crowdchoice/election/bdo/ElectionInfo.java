@@ -43,6 +43,30 @@ public class ElectionInfo {
 		this(null, topic, description, startedOn, endedOn);
 	}
 
+	public void start() {
+		Validate.validState(!hasStarted());
+
+		this.startedOn = OffsetDateTime.now();
+	}
+
+	public void end() {
+		Validate.validState(hasStarted() && !hasEnded());
+
+		this.endedOn = OffsetDateTime.now();
+	}
+
+	public void schedule(final OffsetDateTime start, final OffsetDateTime end) {
+		Validate.isTrue(start == null || Objects.equals(start, startedOn)
+				|| start.isAfter(OffsetDateTime.now()));
+		Validate.isTrue(end == null || (start != null && end.isAfter(start)
+				&& end.isAfter(OffsetDateTime.now())));
+		Validate.validState(!hasStarted() || Objects.equals(start, startedOn));
+		Validate.validState(!hasEnded());
+
+		this.startedOn = start;
+		this.endedOn = end;
+	}
+
 	public boolean isEditable() {
 		return !hasStarted();
 	}

@@ -5,6 +5,7 @@ import java.util.Objects;
 
 import org.springframework.stereotype.Service;
 
+import com.cvesters.crowdchoice.election.action.bdo.ElectionAction;
 import com.cvesters.crowdchoice.election.bdo.ElectionInfo;
 import com.cvesters.crowdchoice.election.dao.ElectionDao;
 import com.cvesters.crowdchoice.exceptions.NotFoundException;
@@ -59,6 +60,21 @@ public class ElectionService {
 		}
 
 		ElectionMapper.updateDao(election, dao);
+		final ElectionDao updated = electionRepository.save(dao);
+		return ElectionMapper.fromDao(updated);
+	}
+
+	public ElectionInfo apply(final ElectionAction action) {
+		Objects.requireNonNull(action);
+
+		final ElectionDao dao = electionRepository
+				.findById(action.getElectionId())
+				.orElseThrow(NotFoundException::new);
+
+		final ElectionInfo currentInfo = ElectionMapper.fromDao(dao);
+		action.apply(currentInfo);
+
+		ElectionMapper.updateDao(currentInfo, dao);
 		final ElectionDao updated = electionRepository.save(dao);
 		return ElectionMapper.fromDao(updated);
 	}
