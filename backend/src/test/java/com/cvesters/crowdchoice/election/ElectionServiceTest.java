@@ -3,12 +3,15 @@ package com.cvesters.crowdchoice.election;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatNoException;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.time.OffsetDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -20,6 +23,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InOrder;
 
+import com.cvesters.crowdchoice.election.action.bdo.ElectionAction;
 import com.cvesters.crowdchoice.election.bdo.ElectionInfo;
 import com.cvesters.crowdchoice.election.dao.ElectionDao;
 import com.cvesters.crowdchoice.exceptions.NotFoundException;
@@ -226,6 +230,86 @@ class ElectionServiceTest {
 			assertThatThrownBy(() -> electionService.update(info))
 					.isInstanceOf(OperationNotAllowedException.class);
 
+		}
+	}
+
+	@Nested
+	class ApplyAction {
+
+		@Test
+		void apply() {
+			final TestElection election = TestElection.TOPICS;
+			final TestAction action = new TestAction(election.id());
+
+			final ElectionDao expectedDao = election.dao();
+			when(electionRepository.findById(election.id()))
+					.thenReturn(Optional.of(expectedDao));
+
+			when(electionRepository.save(expectedDao)).thenReturn(expectedDao);
+
+			final ElectionInfo updated = electionService.apply(action);
+
+			assertThat(updated.getStartedOn()).isEqualTo(election.startedOn());
+
+			final InOrder inOrder = inOrder(electionRepository, expectedDao);
+			inOrder.verify(electionRepository).findById(election.id());
+			inOrder.verify(expectedDao).setTopic(election.topic());
+			inOrder.verify(expectedDao).setDescription(election.description());
+			inOrder.verify(expectedDao).setStartedOn(action.STARTS_ON);
+			inOrder.verify(expectedDao).setEndedOn(action.ENDS_ON);
+			inOrder.verify(expectedDao).setEndedOn(election.endedOn());
+			inOrder.verify(electionRepository).save(expectedDao);
+		}
+
+		@Test
+		void actionNull() {
+			assertThatThrownBy(() -> electionService.apply(null))
+					.isInstanceOf(NullPointerException.class);
+		}
+
+		@Test
+		void electionNotFound() {
+			final long electionId = 123L;
+			final ElectionAction action = mock(ElectionAction.class);
+			when(action.getElectionId()).thenReturn(electionId);
+
+			when(electionRepository.findById(electionId))
+					.thenReturn(Optional.empty());
+
+			assertThatThrownBy(() -> electionService.apply(action))
+					.isInstanceOf(NotFoundException.class);
+		}
+
+		@Test
+		void operationNotAllowed() {
+			final TestElection election = TestElection.FEDERAL_ELECTIONS_2024;
+			final ElectionAction action = mock(ElectionAction.class);
+			when(action.getElectionId()).thenReturn(election.id());
+
+			final ElectionDao expectedDao = election.dao();
+			when(electionRepository.findById(election.id()))
+					.thenReturn(Optional.of(expectedDao));
+
+			final Exception exception = new OperationNotAllowedException();
+			doThrow(exception).when(action).apply(any());
+
+			assertThatThrownBy(() -> electionService.apply(action))
+					.isEqualTo(exception);
+		}
+
+		private class TestAction extends ElectionAction {
+
+			private final OffsetDateTime STARTS_ON = OffsetDateTime.now().plusDays(1);
+			private final OffsetDateTime ENDS_ON = STARTS_ON.plusDays(2);
+
+			public TestAction(final long electionId) {
+				super(electionId);
+			}
+
+			@Override
+			protected void doApply(final ElectionInfo info) {
+				info.schedule(STARTS_ON, ENDS_ON);
+			}
 		}
 	}
 

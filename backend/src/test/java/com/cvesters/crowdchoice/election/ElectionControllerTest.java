@@ -3,11 +3,14 @@ package com.cvesters.crowdchoice.election;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -24,6 +27,8 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.http.MediaType;
@@ -31,6 +36,11 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.RequestBuilder;
 
+import com.cvesters.crowdchoice.election.action.ElectionActionMapper;
+import com.cvesters.crowdchoice.election.action.bdo.ElectionAction;
+import com.cvesters.crowdchoice.election.action.dto.EndElectionDto;
+import com.cvesters.crowdchoice.election.action.dto.ScheduleElectionDto;
+import com.cvesters.crowdchoice.election.action.dto.StartElectionDto;
 import com.cvesters.crowdchoice.election.bdo.ElectionInfo;
 import com.cvesters.crowdchoice.exceptions.NotFoundException;
 import com.cvesters.crowdchoice.exceptions.OperationNotAllowedException;
@@ -327,6 +337,209 @@ class ElectionControllerTest {
 					}
 					""".formatted(topic, description, map(startedOn),
 					map(endedOn));
+		}
+	}
+
+	@Nested
+	class Patch {
+
+		@Test
+		void start() throws Exception {
+			final TestElection election = TestElection.TOPICS;
+			final String requestBody = """
+					{
+						"action": "start"
+					}
+					""";
+
+			try (final MockedStatic<ElectionActionMapper> actionMapper = Mockito
+					.mockStatic(ElectionActionMapper.class);
+					final MockedStatic<ElectionMapper> electionMapper = Mockito
+							.mockStatic(ElectionMapper.class)) {
+				final ElectionAction action = mock();
+				final ElectionInfo updated = mock();
+
+				actionMapper.when(() -> ElectionActionMapper
+						.fromDto(eq(election.id()), argThat(dto -> {
+							assertThat(dto)
+									.isInstanceOf(StartElectionDto.class);
+							return true;
+						}))).thenReturn(action);
+
+				when(electionService.apply(action)).thenReturn(updated);
+
+				electionMapper.when(() -> ElectionMapper.toDto(updated))
+						.thenReturn(election.dto());
+
+				final RequestBuilder request = patch(
+						BASE_URL + "/" + election.id())
+								.contentType(MediaType.APPLICATION_JSON_VALUE)
+								.content(requestBody);
+
+				mockMvc.perform(request)
+						.andExpect(status().isOk())
+						.andExpect(content().json(infoJson(election)));
+			}
+		}
+
+		@Test
+		void end() throws Exception {
+			final TestElection election = TestElection.TOPICS;
+			final String requestBody = """
+					{
+						"action": "end"
+					}
+					""";
+
+			try (final MockedStatic<ElectionActionMapper> actionMapper = Mockito
+					.mockStatic(ElectionActionMapper.class);
+					final MockedStatic<ElectionMapper> electionMapper = Mockito
+							.mockStatic(ElectionMapper.class)) {
+				final ElectionAction action = mock();
+				final ElectionInfo updated = mock();
+
+				actionMapper.when(() -> ElectionActionMapper
+						.fromDto(eq(election.id()), argThat(dto -> {
+							assertThat(dto)
+									.isInstanceOf(EndElectionDto.class);
+							return true;
+						}))).thenReturn(action);
+
+				when(electionService.apply(action)).thenReturn(updated);
+
+				electionMapper.when(() -> ElectionMapper.toDto(updated))
+						.thenReturn(election.dto());
+
+				final RequestBuilder request = patch(
+						BASE_URL + "/" + election.id())
+								.contentType(MediaType.APPLICATION_JSON_VALUE)
+								.content(requestBody);
+
+				mockMvc.perform(request)
+						.andExpect(status().isOk())
+						.andExpect(content().json(infoJson(election)));
+			}
+		}
+
+		@Test
+		void schedule() throws Exception {
+			final TestElection election = TestElection.TOPICS;
+			final OffsetDateTime startOn = OffsetDateTime.now().plusDays(1);
+			final OffsetDateTime endOn = startOn.plusDays(1);
+
+			final String requestBody = """
+					{
+						"action": "schedule",
+						"startOn": %s,
+						"endOn": %s
+					}
+					""".formatted(map(startOn), map(endOn));
+
+			try (final MockedStatic<ElectionActionMapper> actionMapper = Mockito
+					.mockStatic(ElectionActionMapper.class);
+					final MockedStatic<ElectionMapper> electionMapper = Mockito
+							.mockStatic(ElectionMapper.class)) {
+				final ElectionAction action = mock();
+				final ElectionInfo updated = mock();
+
+				actionMapper.when(() -> ElectionActionMapper
+						.fromDto(eq(election.id()), argThat(dto -> {
+							assertThat(dto)
+									.isInstanceOf(ScheduleElectionDto.class);
+							final ScheduleElectionDto schedule = (ScheduleElectionDto) dto;
+							assertThat(schedule.startOn()).isEqualTo(startOn);
+							assertThat(schedule.endOn()).isEqualTo(endOn);
+							return true;
+						}))).thenReturn(action);
+
+				when(electionService.apply(action)).thenReturn(updated);
+
+				electionMapper.when(() -> ElectionMapper.toDto(updated))
+						.thenReturn(election.dto());
+
+				final RequestBuilder request = patch(
+						BASE_URL + "/" + election.id())
+								.contentType(MediaType.APPLICATION_JSON_VALUE)
+								.content(requestBody);
+
+				mockMvc.perform(request)
+						.andExpect(status().isOk())
+						.andExpect(content().json(infoJson(election)));
+			}
+		}
+
+		@Test
+		void withoutBody() throws Exception {
+			final long electionId = 234L;
+			final RequestBuilder request = patch(BASE_URL + "/" + electionId)
+					.contentType(MediaType.APPLICATION_JSON_VALUE);
+
+			mockMvc.perform(request).andExpect(status().isBadRequest());
+		}
+
+		@Test
+		void invalid() throws Exception {
+			final String requestBody = patchJson("tank");
+
+			final long electionId = 234L;
+			final RequestBuilder request = patch(BASE_URL + "/" + electionId)
+					.contentType(MediaType.APPLICATION_JSON_VALUE)
+					.content(requestBody);
+
+			mockMvc.perform(request).andExpect(status().isBadRequest());
+		}
+
+		@Test
+		void notFound() throws Exception {
+			final TestElection election = TestElection.TOPICS;
+
+			final String requestBody = patchJson("start");
+
+			doThrow(new NotFoundException()).when(electionService).apply(any());
+
+			final RequestBuilder request = patch(BASE_URL + "/" + election.id())
+					.contentType(MediaType.APPLICATION_JSON_VALUE)
+					.content(requestBody);
+
+			mockMvc.perform(request).andExpect(status().isNotFound());
+		}
+
+		@Test
+		void error() throws Exception {
+			final TestElection election = TestElection.TOPICS;
+			final String requestBody = patchJson("start");
+
+			when(electionService.apply(any()))
+					.thenThrow(RuntimeException.class);
+
+			final RequestBuilder request = patch(BASE_URL + "/" + election.id())
+					.contentType(MediaType.APPLICATION_JSON_VALUE)
+					.content(requestBody);
+
+			mockMvc.perform(request).andExpect(status().is5xxServerError());
+		}
+
+		@Test
+		void operationNotAllowed() throws Exception {
+			final TestElection election = TestElection.TOPICS;
+			final String requestBody = patchJson("start");
+
+			when(electionService.apply(any()))
+					.thenThrow(OperationNotAllowedException.class);
+
+			final RequestBuilder request = patch(BASE_URL + "/" + election.id())
+					.contentType(MediaType.APPLICATION_JSON_VALUE)
+					.content(requestBody);
+
+			mockMvc.perform(request).andExpect(status().isMethodNotAllowed());
+		}
+
+		private String patchJson(final String action) {
+			return """
+					{
+						"action": "%s"
+					}
+					""".formatted(action);
 		}
 	}
 

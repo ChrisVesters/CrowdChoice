@@ -37,6 +37,10 @@ public record TestElection(long id, String topic, String description,
 		return ALL.stream().map(Arguments::of);
 	}
 
+	public ElectionInfoDto dto() {
+		return new ElectionInfoDto(id, topic, description, startedOn, endedOn);
+	}
+
 	public ElectionDao dao() {
 		final ElectionDao dao = mock(
 				withSettings().strictness(Strictness.LENIENT));

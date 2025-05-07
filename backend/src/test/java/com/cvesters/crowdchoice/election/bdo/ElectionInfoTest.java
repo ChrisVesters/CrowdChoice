@@ -2,9 +2,11 @@ package com.cvesters.crowdchoice.election.bdo;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.within;
 
 import java.time.OffsetDateTime;
 import java.time.Period;
+import java.time.temporal.ChronoUnit;
 
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -13,7 +15,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 
 import com.cvesters.crowdchoice.election.TestElection;
 
-public class ElectionInfoTest {
+class ElectionInfoTest {
 
 	private static final TestElection ELECTION = TestElection.FEDERAL_ELECTIONS_2024;
 	private static final long ID = ELECTION.id();
@@ -21,6 +23,11 @@ public class ElectionInfoTest {
 	private static final String DESCRIPTION = ELECTION.description();
 	private static final OffsetDateTime STARTED_ON = ELECTION.startedOn();
 	private static final OffsetDateTime ENDED_ON = ELECTION.endedOn();
+
+	private static final OffsetDateTime TODAY = OffsetDateTime.now();
+	private static final OffsetDateTime YESTERDAY = TODAY.minusDays(1);
+	private static final OffsetDateTime TOMORROW = TODAY.plusDays(1);
+	private static final OffsetDateTime AFTER_TOMORROW = TOMORROW.plusDays(1);
 
 	@Nested
 	class ConstructorWithId {
@@ -231,6 +238,263 @@ public class ElectionInfoTest {
 					startedOn, endedOn);
 
 			assertThat(election.isActive()).isFalse();
+		}
+	}
+
+	// TODO
+	@Nested
+	class Schedule {
+
+		@Test
+		void scheduleStartAndEndDraft() {
+			final var election = new ElectionInfo(TOPIC, DESCRIPTION, null,
+					null);
+
+			election.schedule(TOMORROW, AFTER_TOMORROW);
+
+			assertThat(election.getStartedOn()).isEqualTo(TOMORROW);
+			assertThat(election.getEndedOn()).isEqualTo(AFTER_TOMORROW);
+		}
+
+		@Test
+		void scheduleStartDraft() {
+			final var election = new ElectionInfo(TOPIC, DESCRIPTION, null,
+					null);
+
+			election.schedule(TOMORROW, null);
+
+			assertThat(election.getStartedOn()).isEqualTo(TOMORROW);
+			assertThat(election.getEndedOn()).isNull();
+		}
+
+		@Test
+		void scheduleStartScheduled() {
+			final var election = new ElectionInfo(TOPIC, DESCRIPTION, TOMORROW,
+					null);
+
+			election.schedule(AFTER_TOMORROW, null);
+
+			assertThat(election.getStartedOn()).isEqualTo(AFTER_TOMORROW);
+			assertThat(election.getEndedOn()).isNull();
+		}
+
+		@Test
+		void scheduleStartInProgress() {
+			final var election = new ElectionInfo(TOPIC, DESCRIPTION, YESTERDAY,
+					null);
+
+			assertThatThrownBy(() -> election.schedule(TOMORROW, null))
+					.isInstanceOf(IllegalStateException.class);
+		}
+
+		@Test
+		void scheduleEndScheduled() {
+			final var election = new ElectionInfo(TOPIC, DESCRIPTION, TOMORROW,
+					null);
+
+			election.schedule(TOMORROW, AFTER_TOMORROW);
+
+			assertThat(election.getStartedOn()).isEqualTo(TOMORROW);
+			assertThat(election.getEndedOn()).isEqualTo(AFTER_TOMORROW);
+		}
+
+		@Test
+		void scheduleEndInProgress() {
+			final var election = new ElectionInfo(TOPIC, DESCRIPTION, YESTERDAY,
+					TOMORROW);
+
+			election.schedule(YESTERDAY, AFTER_TOMORROW);
+
+			assertThat(election.getStartedOn()).isEqualTo(YESTERDAY);
+			assertThat(election.getEndedOn()).isEqualTo(AFTER_TOMORROW);
+		}
+
+		@Test
+		void scheduleEndEnded() {
+			final var election = new ElectionInfo(TOPIC, DESCRIPTION, YESTERDAY,
+					TODAY);
+
+			assertThatThrownBy(() -> election.schedule(YESTERDAY, TOMORROW))
+					.isInstanceOf(IllegalStateException.class);
+		}
+
+		@Test
+		void unschedule() {
+			final var election = new ElectionInfo(TOPIC, DESCRIPTION, TOMORROW,
+					AFTER_TOMORROW);
+
+			election.schedule(null, null);
+
+			assertThat(election.getStartedOn()).isNull();
+			assertThat(election.getEndedOn()).isNull();
+		}
+
+		@Test
+		void unscheduleStartScheduled() {
+			final var election = new ElectionInfo(TOPIC, DESCRIPTION, TOMORROW,
+					null);
+
+			election.schedule(null, null);
+
+			assertThat(election.getStartedOn()).isNull();
+			assertThat(election.getEndedOn()).isNull();
+		}
+
+		@Test
+		void unscheduledStartInProgress() {
+			final var election = new ElectionInfo(TOPIC, DESCRIPTION, YESTERDAY,
+					null);
+
+			assertThatThrownBy(() -> election.schedule(null, null))
+					.isInstanceOf(IllegalStateException.class);
+		}
+
+		@Test
+		void unscheduleEndScheduled() {
+			final var election = new ElectionInfo(TOPIC, DESCRIPTION, TOMORROW,
+					AFTER_TOMORROW);
+
+			election.schedule(TOMORROW, null);
+
+			assertThat(election.getStartedOn()).isEqualTo(TOMORROW);
+			assertThat(election.getEndedOn()).isNull();
+		}
+
+		@Test
+		void unscheduleEndInProgress() {
+			final var election = new ElectionInfo(TOPIC, DESCRIPTION, YESTERDAY, TOMORROW);
+
+			election.schedule(YESTERDAY, null);
+
+			assertThat(election.getStartedOn()).isEqualTo(YESTERDAY);
+			assertThat(election.getEndedOn()).isNull();
+		}
+
+		@Test
+		void unscheduleEndEnded() {
+			final var election = new ElectionInfo(TOPIC, DESCRIPTION, YESTERDAY,
+					TODAY);
+
+			assertThatThrownBy(() -> election.schedule(YESTERDAY, null))
+					.isInstanceOf(IllegalStateException.class);
+		}
+
+		@Test
+		void endBeforeStart() {
+			final var election = new ElectionInfo(TOPIC, DESCRIPTION, null,
+					null);
+
+			assertThatThrownBy(
+					() -> election.schedule(AFTER_TOMORROW, TOMORROW))
+							.isInstanceOf(IllegalArgumentException.class);
+		}
+
+		@Test
+		void endWithoutStart() {
+			final var election = new ElectionInfo(TOPIC, DESCRIPTION, null,
+					null);
+
+			assertThatThrownBy(() -> election.schedule(null, TOMORROW))
+					.isInstanceOf(IllegalArgumentException.class);
+		}
+
+		@Test
+		void startInPast() {
+			final var election = new ElectionInfo(TOPIC, DESCRIPTION, null,
+					null);
+
+			assertThatThrownBy(() -> election.schedule(YESTERDAY, TOMORROW))
+					.isInstanceOf(IllegalArgumentException.class);
+		}
+
+		@Test
+		void endInPast() {
+			final var BEFORE_YESTERDAY = YESTERDAY.minusDays(1);
+			final var election = new ElectionInfo(TOPIC, DESCRIPTION,
+					BEFORE_YESTERDAY, null);
+
+			assertThatThrownBy(
+					() -> election.schedule(BEFORE_YESTERDAY, YESTERDAY))
+							.isInstanceOf(IllegalArgumentException.class);
+		}
+	}
+
+	@Nested
+	class Start {
+
+		@Test
+		void success() {
+			final var election = new ElectionInfo(TOPIC, DESCRIPTION, null,
+					null);
+
+			election.start();
+
+			assertThat(election.getStartedOn()).isCloseTo(OffsetDateTime.now(),
+					within(100, ChronoUnit.MILLIS));
+		}
+
+		@Test
+		void scheduled() {
+			final var election = new ElectionInfo(TOPIC, DESCRIPTION, TOMORROW,
+					null);
+
+			election.start();
+
+			assertThat(election.getStartedOn()).isCloseTo(OffsetDateTime.now(),
+					within(100, ChronoUnit.MILLIS));
+		}
+
+		@Test
+		void alreadyStarted() {
+			final var election = new ElectionInfo(TOPIC, DESCRIPTION, YESTERDAY,
+					null);
+
+			assertThatThrownBy(() -> election.start())
+					.isInstanceOf(IllegalStateException.class);
+		}
+	}
+
+	@Nested
+	class End {
+
+		@Test
+		void success() {
+			final var election = new ElectionInfo(TOPIC, DESCRIPTION, YESTERDAY,
+					null);
+
+			election.end();
+
+			assertThat(election.getEndedOn()).isCloseTo(OffsetDateTime.now(),
+					within(100, ChronoUnit.MILLIS));
+		}
+
+		@Test
+		void scheduled() {
+			final var election = new ElectionInfo(TOPIC, DESCRIPTION, YESTERDAY,
+					TOMORROW);
+
+			election.end();
+
+			assertThat(election.getEndedOn()).isCloseTo(OffsetDateTime.now(),
+					within(100, ChronoUnit.MILLIS));
+		}
+
+		@Test
+		void alreadyEnded() {
+			final var election = new ElectionInfo(TOPIC, DESCRIPTION, YESTERDAY,
+					TODAY);
+
+			assertThatThrownBy(() -> election.end())
+					.isInstanceOf(IllegalStateException.class);
+		}
+
+		@Test
+		void notStarted() {
+			final var election = new ElectionInfo(TOPIC, DESCRIPTION, TOMORROW,
+					null);
+
+			assertThatThrownBy(() -> election.end())
+					.isInstanceOf(IllegalStateException.class);
 		}
 	}
 }
