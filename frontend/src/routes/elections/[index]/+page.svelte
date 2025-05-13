@@ -5,11 +5,20 @@
 	import CandidateTable from "$lib/candidate/CandidateTable.svelte";
 	import VoteCountTable from "$lib/vote/VoteCountTable.svelte";
 
-	import type { Election } from "$lib/election/ElectionTypes";
+	import DropdownButton from "$lib/common/button/DropdownButton.svelte";
+	import { ElectionClient } from "$lib/election/ElectionClient";
+	import {
+		EndElectionequest,
+		ScheduleElectionRequest,
+		StartElectionRequest,
+		type Election
+	} from "$lib/election/ElectionTypes";
+	import ScheduleElectionDialog from "$lib/election/ScheduleElectionDialog.svelte";
 
 	const { data } = $props();
 
 	let tab: string = $state("candidates");
+	let isScheduleDialogVisible: boolean = $state(false);
 
 	function openTab(tabName: string): void {
 		tab = tabName;
@@ -20,6 +29,28 @@
 			election.startedOn == null ||
 			new Date(election.startedOn) > new Date()
 		);
+	}
+
+	function startElection(): void {
+		ElectionClient.patch(data.info.id, new StartElectionRequest()).then(
+			invalidateAll
+		);
+	}
+
+	function endElection(): void {
+		ElectionClient.patch(data.info.id, new EndElectionequest()).then(
+			invalidateAll
+		);
+	}
+
+	function showScheduleDialog(): void {
+		isScheduleDialogVisible = true;
+	}
+
+	function scheduleElection(action: ScheduleElectionRequest): void {
+		ElectionClient.patch(data.info.id, action)
+			.then(invalidateAll)
+			.then(() => (isScheduleDialogVisible = false));
 	}
 </script>
 
@@ -32,6 +63,34 @@
 		: ""}
 </div>
 <h2>{@html data.info.description}</h2>
+
+{#if data.info.startedOn ? new Date(data.info.startedOn) > new Date() : true}
+	<DropdownButton
+		actions={[
+			{
+				label: $t("common.start"),
+				onClick: startElection
+			},
+			{
+				label: $t("common.schedule"),
+				onClick: showScheduleDialog
+			}
+		]}
+	/>
+{:else if data.info.endedOn ? new Date(data.info.endedOn) > new Date() : true}
+	<DropdownButton
+		actions={[
+			{
+				label: $t("common.end"),
+				onClick: endElection
+			},
+			{
+				label: $t("common.schedule"),
+				onClick: showScheduleDialog
+			}
+		]}
+	/>
+{/if}
 
 <div class="tab">
 	<button
@@ -67,3 +126,12 @@
 		/>
 	{/if}
 </div>
+
+{#if isScheduleDialogVisible}
+	<ScheduleElectionDialog
+		startsOn={data.info.startedOn}
+		endsOn={data.info.endedOn}
+		onClose={() => (isScheduleDialogVisible = false)}
+		onSchedule={scheduleElection}
+	/>
+{/if}
