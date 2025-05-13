@@ -1,6 +1,7 @@
 import type {
 	CreateElectionRequest,
 	Election,
+	ElectionActionRequest,
 	UpdateElectionRequest
 } from "./ElectionTypes";
 
@@ -31,6 +32,19 @@ export class ElectionClient {
 	): Promise<Election> {
 		return fetch(`${getEndpoint()}/${electionId}`, {
 			method: "PUT",
+			headers: {
+				"Content-Type": "application/json"
+			},
+			body: JSON.stringify(request)
+		}).then(res => res.json());
+	}
+
+	public static async patch(
+		electionId: number,
+		request: ElectionActionRequest
+	): Promise<Election> {
+		return fetch(`${getEndpoint()}/${electionId}`, {
+			method: "PATCH",
 			headers: {
 				"Content-Type": "application/json"
 			},
